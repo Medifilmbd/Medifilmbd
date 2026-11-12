@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="bn" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediFilm BD | মেডিকেল ড্রাই ফিল্ম ও ডায়াগনস্টিক ইমেজিং পোর্টাল</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Hind Siliguri & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Firebase JS SDK v10 (Compat CDN for Realtime Cloud Sync) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Hind Siliguri"', 'Inter', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        medical: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background-color: #f8fafc;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .animate-shake {
+            animation: shake 0.35s ease-in-out;
+        }
+        @media print {
+            body * { visibility: hidden; }
+            #printableInvoiceArea, #printableInvoiceArea * { visibility: visible; }
+            #printableInvoiceArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white;
+                padding: 20px;
+            }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-teal-600 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Top Bar: Real-Time Bengali Date/Clock & Urgent Notice -->
+    <div class="bg-slate-950 text-slate-200 border-b border-slate-800 text-xs sm:text-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-2">
+            <!-- Real-Time Clock & Calendar (BST) -->
+            <div class="flex items-center gap-2.5 font-medium text-teal-300">
+                <span class="inline-flex items-center gap-1.5 bg-teal-500/10 border border-teal-500/30 px-2.5 py-0.5 rounded-lg">
+                    <i class="fa-regular fa-clock text-teal-400"></i>
+                    <span id="liveBengaliClock" class="tracking-wide">সময় লোড হচ্ছে...</span>
+                    <span class="text-[10px] uppercase bg-teal-500/20 text-teal-200 px-1.5 rounded font-inter">BST</span>
+                </span>
+                <!-- Real-Time Cloud Sync Status Pill -->
+                <span id="cloudStatusBadge" title="ডাটা সিঙ্ক স্ট্যাটাস" class="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-300 px-2.5 py-0.5 rounded-lg text-[11px] font-inter font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    <span>Local Mode</span>
+                </span>
+            </div>
+
+            <!-- Right Quick Contact & Discreet Admin Lock -->
+            <div class="flex items-center gap-4 text-xs text-slate-300">
+                <a id="topPhoneLink" href="#" class="hover:text-white flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-phone-volume text-teal-400"></i>
+                    <span id="displayTopPhone" class="font-inter font-medium"></span>
+                </a>
+                <span class="text-slate-700">|</span>
+                <button onclick="openAdminGate()" title="Authorized Access Only" class="text-slate-400 hover:text-teal-300 flex items-center gap-1 transition">
+                    <i class="fa-solid fa-lock text-[11px]"></i>
+                    <span class="hidden sm:inline">পোর্টাল লগইন</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Urgent Notice Bar (Toggleable by Admin) -->
+    <div id="topNoticeBar" class="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 text-white py-2.5 px-4 text-sm border-b border-teal-800/40">
+        <div class="max-w-7xl mx-auto flex items-center justify-center sm:justify-between gap-3">
+            <div class="flex items-center gap-2.5 text-center sm:text-left">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30 shrink-0">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                    বিজ্ঞপ্তি
+                </span>
+                <p id="displayTopNotice" class="font-medium text-slate-100 leading-snug"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sticky Main Navbar -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-600 to-slate-900 flex items-center justify-center text-white shadow-md shadow-teal-600/20 group-hover:scale-105 transition">
+                    <i class="fa-solid fa-x-ray text-xl"></i>
+                </div>
+                <div>
+                    <h1 id="displayBrandName" class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-none font-inter">MediFilm BD</h1>
+                    <p id="displayTagline" class="text-xs text-teal-700 font-medium mt-0.5">মেডিকেল ড্রাই ফিল্ম ও ডায়াগনস্টিক সাপ্লায়ার</p>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center gap-7 font-medium text-slate-700">
+                <a href="#products" class="hover:text-teal-600 transition">পণ্য ও লাইভ স্টক</a>
+                <a href="#order-section" class="hover:text-teal-600 transition">অনলাইন অর্ডার</a>
+                <a id="navPaymentLink" href="#payment-accounts" class="hover:text-teal-600 transition">পেমেন্ট মাধ্যম</a>
+                <a href="#corporate-contact" class="hover:text-teal-600 transition">যোগাযোগ</a>
+            </nav>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2.5">
+                <a href="#order-section" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-sm shadow-teal-600/20 transition flex items-center gap-2">
+                    <i class="fa-solid fa-cart-plus"></i>
+                    <span class="hidden sm:inline">প্রি-অর্ডার করুন</span>
+                    <span class="sm:hidden">অর্ডার</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section (Clean Public Storefront - Private Client Data Strictly Hidden) -->
+    <section class="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 text-white py-12 sm:py-16 lg:py-20">
+        <!-- Decorative Grid Pattern -->
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#2dd4bf 1px, transparent 1px); background-size: 24px 24px;"></div>
+        
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            <div class="lg:col-span-7 space-y-6">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-500/15 border border-teal-400/30 text-teal-300 text-xs sm:text-sm font-medium">
+                    <i class="fa-solid fa-certificate text-teal-400"></i>
+                    <span>বাংলাদেশের বিশ্বস্ত মেডিকেল ইমেজিং ও ড্রাই ফিল্ম আমদানিকারক</span>
+                </div>
+                
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
+                    ডায়াগনস্টিক সেন্টার ও হাসপাতালের জন্য অরিজিনাল <span class="text-teal-400">Fujifilm DI-HL</span> মেডিকেল ড্রাই ফিল্ম
+                </h2>
+                
+                <p class="text-slate-300 text-base sm:text-lg max-w-2xl leading-relaxed">
+                    সারা বাংলাদেশে দ্রুততম ডেলিভারি, সরাসরি পাইকারি কর্পোরেট রেট এবং ভ্যাট চালানসহ নিরাপদ সরবরাহ। স্টক ফুরিয়ে যাওয়ার আগেই আপনার প্রতিষ্ঠানের প্রি-অর্ডার নিশ্চিত করুন।
+                </p>
+
+                <div class="flex flex-wrap items-center gap-3.5 pt-2">
+                    <a href="#products" class="bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold px-6 py-3.5 rounded-xl shadow-lg shadow-teal-500/25 transition flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                        <span>লাইভ স্টক ও মূল্য দেখুন</span>
+                    </a>
+                    <a id="heroWhatsappBtn" href="#" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3.5 rounded-xl shadow-lg transition flex items-center gap-2">
+                        <i class="fa-brands fa-whatsapp text-xl"></i>
+                        <span>WhatsApp হটলাইন</span>
+                    </a>
+                </div>
+
+                <!-- Trust Stats -->
+                <div class="grid grid-cols-3 gap-4 pt-6 border-t border-slate-700/70 max-w-lg">
+                    <div>
+                        <p class="text-2xl font-bold text-white font-inter">১০০%</p>
+                        <p class="text-xs text-slate-400">অরিজিনাল ইম্পোর্টেড</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-teal-400 font-inter">২৪ ঘণ্টা</p>
+                        <p class="text-xs text-slate-400">সারা দেশে কুরিয়ার ডেলিভারি</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-white font-inter">B2B</p>
+                        <p class="text-xs text-slate-400">হোলসেল কর্পোরেট সাপোর্ট</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side Public Corporate Assurance & Quick Order Guide Card -->
+            <div class="lg:col-span-5">
+                <div class="bg-white/10 backdrop-blur-md border border-teal-400/25 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-36 h-36 bg-teal-500/15 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+                    
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-400/30 text-teal-300 flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-hospital-user"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-teal-300">B2B কর্পোরেট পোর্টাল</span>
+                            <h3 class="text-xl font-bold text-white">সহজ ৩ ধাপে অর্ডার প্রক্রিয়া</h3>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 text-sm">
+                        <div class="flex items-start gap-3.5 bg-slate-900/60 border border-slate-700/70 p-3.5 rounded-2xl">
+                            <span class="w-7 h-7 rounded-lg bg-teal-500 text-slate-950 font-bold flex items-center justify-center shrink-0 font-inter">1</span>
+                            <div>
+                                <p class="font-bold text-white">সাইজ ও স্টক যাচাই করুন</p>
+                                <p class="text-slate-300 text-xs mt-0.5">নিচের ক্যাটালগ থেকে আপনার প্রয়োজনীয় ফিল্মের সাইজ ও পরিমাণ নির্বাচন করুন।</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3.5 bg-slate-900/60 border border-slate-700/70 p-3.5 rounded-2xl">
+                            <span class="w-7 h-7 rounded-lg bg-teal-500 text-slate-950 font-bold flex items-center justify-center shrink-0 font-inter">2</span>
+                            <div>
+                                <p class="font-bold text-white">অর্ডার ফর্ম সাবমিট করুন</p>
+                                <p class="text-slate-300 text-xs mt-0.5">আপনার প্রতিষ্ঠানের নাম, ডেলিভারি ঠিকানা ও মোবাইল নম্বর দিয়ে অর্ডার কনফার্ম করুন।</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3.5 bg-slate-900/60 border border-slate-700/70 p-3.5 rounded-2xl">
+                            <span class="w-7 h-7 rounded-lg bg-teal-500 text-slate-950 font-bold flex items-center justify-center shrink-0 font-inter">3</span>
+                            <div>
+                                <p class="font-bold text-white">দ্রুত ডেলিভারি ও ইনভয়েস</p>
+                                <p class="text-slate-300 text-xs mt-0.5">আমাদের প্রতিনিধি যোগাযোগ করে অফিসিয়াল ইনভয়েস ও ডেলিভারি নিশ্চিত করবেন।</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-5 border-t border-white/10 flex items-center justify-between gap-3">
+                        <div class="text-xs text-slate-300">
+                            <p>জরুরি প্রয়োজনে কল করুন:</p>
+                            <p id="heroCardPhone" class="font-inter font-bold text-white text-sm mt-0.5"></p>
+                        </div>
+                        <a href="#order-section" class="bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-sm transition">
+                            অর্ডার শুরু করুন →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+
+        <!-- Section 1: Product Catalog & Live Stock -->
+        <section id="products" class="scroll-mt-24">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                <div>
+                    <span class="text-teal-600 font-semibold text-sm uppercase tracking-wider">পণ্য ক্যাটালগ ও লাইভ ইনভেন্টরি</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">মেডিকেল ড্রাই ফিল্ম ও ইমেজিং পণ্যসমূহ</h2>
+                    <p class="text-slate-600 text-sm sm:text-base mt-1">আপনার প্রয়োজনীয় সাইজ নির্বাচন করে সরাসরি প্রি-অর্ডার অথবা ইনভয়েস রিকোয়েস্ট পাঠান।</p>
+                </div>
+                
+                <!-- Filter Pills -->
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="filterProducts('ALL')" class="filter-btn active px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-white transition" data-filter="ALL">সকল পণ্য</button>
+                    <button onclick="filterProducts('In Stock')" class="filter-btn px-4 py-2 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition" data-filter="In Stock">স্টকে আছে</button>
+                    <button onclick="filterProducts('Limited')" class="filter-btn px-4 py-2 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition" data-filter="Limited">সীমিত স্টক</button>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Dynamically populated by JS -->
+            </div>
+        </section>
+
+        <!-- Section 2: Official Payment Accounts (Controlled by Admin Show/Hide Toggle) -->
+        <section id="payment-accounts" class="scroll-mt-24">
+            <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-100">
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 text-teal-600 font-semibold text-sm">
+                            <i class="fa-solid fa-building-columns"></i>
+                            অফিসিয়াল পেমেন্ট গেটওয়ে ও ব্যাংক চ্যানেল
+                        </span>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">পেমেন্ট পরিশোধের মাধ্যমসমূহ</h2>
+                        <p class="text-slate-600 text-sm mt-1">যেকোনো অ্যাকাউন্ট নম্বরের পাশে থাকা <strong>কপি</strong> বাটনে ক্লিক করে নম্বরটি সংগ্রহ করুন।</p>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-2xl text-xs sm:text-sm max-w-md">
+                        <i class="fa-solid fa-circle-info text-amber-600 mr-1"></i>
+                        পেমেন্ট করার পর অবশ্যই ট্রানজেকশন আইডি (TrxID) সংরক্ষণ করুন এবং নিচের অর্ডার ফর্মে জমা দিন।
+                    </div>
+                </div>
+
+                <!-- Payment Cards Grid -->
+                <div id="paymentAccountsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <!-- Dynamically populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Quick B2B Order & Payment Verification Form -->
+        <section id="order-section" class="scroll-mt-24">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Form Card -->
+                <div class="lg:col-span-7 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+                    <div class="mb-6">
+                        <span class="text-teal-600 font-semibold text-sm">অনলাইন অর্ডার ও বিল ভেরিফিকেশন</span>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">অর্ডার প্লেস করুন অথবা পেমেন্ট তথ্য জমা দিন</h2>
+                        <p class="text-slate-600 text-sm mt-1">ফর্মটি পূরণ করলে সরাসরি আমাদের অ্যাডমিন ড্যাশবোর্ডে আপনার অর্ডার ও পেমেন্ট রেকর্ড যুক্ত হবে।</p>
+                    </div>
+
+                    <form id="customerOrderForm" class="space-y-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">প্রতিষ্ঠান / ডায়াগনস্টিক সেন্টারের নাম *</label>
+                                <input type="text" id="ordInstitution" required placeholder="যেমন: রবিন ট্রেড ইন্টারন্যাশনাল / পপুলার ডায়াগনস্টিক" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">যোগাযোগকারীর নাম *</label>
+                                <input type="text" id="ordContactPerson" required placeholder="আপনার পূর্ণ নাম লিখুন" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 outline-none text-sm">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">মোবাইল / হোয়াটসঅ্যাপ নম্বর *</label>
+                                <input type="tel" id="ordPhone" required placeholder="017XXXXXXXX" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 outline-none text-sm font-inter">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">পণ্য নির্বাচন করুন *</label>
+                                <select id="ordProductSelect" onchange="calculateOrderTotal()" required class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 outline-none text-sm bg-white">
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">পরিমাণ (বক্স) *</label>
+                                <input type="number" id="ordQuantity" min="1" value="1" oninput="calculateOrderTotal()" required class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 outline-none text-sm font-inter">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">পেমেন্ট মাধ্যম *</label>
+                                <select id="ordPaymentMethod" required class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 outline-none text-sm bg-white">
+                                    <option value="bKash">bKash (বিকাশ)</option>
+                                    <option value="Nagad">Nagad (নগদ)</option>
+                                    <option value="Rocket">Rocket (রকেট)</option>
+                                    <option value="Bank Transfer">Bank Transfer (ব্যাংক ট্রান্সফার)</option>
+                                    <option value="Due / Invoice">বকেয়া ইনভয়েস / ক্যাশ অন ডেলিভারি</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">ট্রানজেকশন আইডি (TrxID)</label>
+                                <input type="text" id="ordTrxId" placeholder="যেমন: 9H7K2L4M (যদি পেমেন্ট করে থাকেন)" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 outline-none text-sm font-inter">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">ডেলিভারি ঠিকানা ও বিশেষ নোট *</label>
+                            <textarea id="ordAddress" rows="2" required placeholder="জেলা, থানা, রোড নম্বর বা কুরিয়ার অফিসের নাম লিখুন..." class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 outline-none text-sm"></textarea>
+                        </div>
+
+                        <!-- Live Summary Box -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-slate-500">আনুমানিক সর্বমোট বিল</p>
+                                <p class="text-2xl font-bold text-teal-700 font-inter">৳ <span id="ordCalculatedTotal">0</span></p>
+                            </div>
+                            <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-7 py-3.5 rounded-xl shadow-md shadow-teal-600/20 transition flex items-center gap-2">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>অর্ডার ও তথ্য নিশ্চিত করুন</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Order Success Confirmation Box (Hidden initially) -->
+                    <div id="orderConfirmationBox" class="hidden mt-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-6 space-y-4">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                                <i class="fa-solid fa-check text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold text-emerald-950">আপনার অর্ডার ও পেমেন্ট তথ্য সফলভাবে গৃহীত হয়েছে!</h4>
+                                <p class="text-sm text-emerald-800 mt-0.5">অর্ডার আইডি: <strong id="confirmedOrderId" class="font-inter bg-white px-2 py-0.5 rounded border border-emerald-200"></strong></p>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <a id="sendOrderWhatsappBtn" href="#" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 transition">
+                                <i class="fa-brands fa-whatsapp text-lg"></i>
+                                <span>হোয়াটসঅ্যাপে রশিদ পাঠান</span>
+                            </a>
+                            <button onclick="resetOrderForm()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-semibold px-5 py-2.5 rounded-xl text-sm transition">
+                                নতুন অর্ডার করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side Support & Quick Guide -->
+                <div id="corporate-contact" class="lg:col-span-5 space-y-6">
+                    <div class="bg-slate-900 text-white rounded-3xl p-7 shadow-lg relative overflow-hidden">
+                        <div class="absolute -right-8 -bottom-8 w-40 h-40 bg-teal-500/20 rounded-full blur-2xl"></div>
+                        <h3 class="text-xl font-bold flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-headset text-teal-400"></i>
+                            সরাসরি কর্পোরেট সাপোর্ট ও অফিস
+                        </h3>
+                        <p class="text-slate-300 text-sm leading-relaxed mb-5">
+                            বড় পরিসরে বাল্ক অর্ডার, হাসপাতাল টেন্ডার অথবা জরুরি ইনভয়েস সংক্রান্ত যেকোনো তথ্যের জন্য আমাদের সাপোর্ট টিমের সাথে সরাসরি কথা বলুন।
+                        </p>
+                        <div class="space-y-3">
+                            <a id="cardPhoneLink" href="#" class="flex items-center gap-3.5 bg-white/10 hover:bg-white/15 p-3.5 rounded-2xl border border-white/10 transition">
+                                <div class="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-phone"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-slate-400">হটলাইন নম্বর</p>
+                                    <p id="displayCardPhone" class="font-bold font-inter text-base"></p>
+                                </div>
+                            </a>
+                            <a id="cardWhatsappLink" href="#" target="_blank" class="flex items-center gap-3.5 bg-emerald-600/20 hover:bg-emerald-600/30 p-3.5 rounded-2xl border border-emerald-500/30 transition">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                                    <i class="fa-brands fa-whatsapp text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-emerald-200">হোয়াটসঅ্যাপ সাপোর্ট (২৪/৭)</p>
+                                    <p id="displayCardWhatsapp" class="font-bold font-inter text-base text-white"></p>
+                                </div>
+                            </a>
+                            <div class="flex items-center gap-3.5 bg-white/5 p-3.5 rounded-2xl border border-white/10">
+                                <div class="w-10 h-10 rounded-xl bg-slate-800 text-teal-400 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-slate-400">ইমেইল ও কর্পোরেট অফিস</p>
+                                    <p id="displayCardEmail" class="font-semibold font-inter text-sm text-white"></p>
+                                    <p id="displayCardAddress" class="text-xs text-slate-300 mt-0.5"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+                        <h4 class="font-bold text-slate-900 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-shield-check text-teal-600"></i>
+                            কেন MediFilm BD থেকে অর্ডার করবেন?
+                        </h4>
+                        <ul class="space-y-2.5 text-sm text-slate-600">
+                            <li class="flex items-start gap-2.5">
+                                <i class="fa-solid fa-circle-check text-teal-600 mt-1"></i>
+                                <span>তাপমাত্রা-নিয়ন্ত্রিত ওয়্যারহাউজে সংরক্ষিত ১০০% অরিজিনাল মেডিকেল ফিল্ম।</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i class="fa-solid fa-circle-check text-teal-600 mt-1"></i>
+                                <span>Fujifilm DryPix সহ সকল স্ট্যান্ডার্ড মেডিকেল ড্রাই প্রিন্টারে শতভাগ সামঞ্জস্যপূর্ণ।</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i class="fa-solid fa-circle-check text-teal-600 mt-1"></i>
+                                <span>প্রতিটি চালানের সাথে ভ্যাট চালান ও অফিসিয়াল ইনভয়েস প্রদান।</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-400 border-t border-slate-800 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-teal-600 flex items-center justify-center text-white">
+                    <i class="fa-solid fa-x-ray"></i>
+                </div>
+                <div>
+                    <p id="footerBrandName" class="text-white font-bold font-inter text-lg">MediFilm BD</p>
+                    <p id="footerCopyrightText" class="text-xs text-slate-400">স্বত্ব © ২০২৬ সর্বস্বত্ব সংরক্ষিত | মেডিকেল ইমেজিং সলিউশন</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-5 text-sm">
+                <a href="#products" class="hover:text-white transition">পণ্যসমূহ</a>
+                <a id="footerPaymentLink" href="#payment-accounts" class="hover:text-white transition">পেমেন্ট তথ্য</a>
+                <a href="#order-section" class="hover:text-white transition">অর্ডার করুন</a>
+                <button onclick="openAdminGate()" class="text-slate-500 hover:text-teal-400 font-medium flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-lock text-xs"></i>
+                    <span>Admin Portal</span>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp Button -->
+    <a id="floatingWhatsappBtn" href="#" target="_blank" title="WhatsApp-এ মেসেজ দিন" class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-xl shadow-emerald-600/30 flex items-center justify-center text-3xl transition hover:scale-110">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- ===================================================================== -->
+    <!-- SECURITY CODE GATE MODAL (STRICT PRIVACY - NO DEFAULT PIN HINT) -->
+    <!-- ===================================================================== -->
+    <div id="adminGateModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div id="adminGateBox" class="bg-white rounded-3xl max-w-md w-full p-7 shadow-2xl border border-slate-200 relative">
+            <button onclick="closeAdminGate()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="w-14 h-14 rounded-2xl bg-slate-900 text-teal-400 flex items-center justify-center text-2xl mb-4 shadow-md">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+
+            <h3 class="text-2xl font-bold text-slate-900">সুরক্ষিত অ্যাডমিন পোর্টাল</h3>
+            <p class="text-slate-600 text-sm mt-1">শুধুমাত্র অনুমোদিত কর্তৃপক্ষের জন্য। প্রবেশ করতে আপনার গোপন সিকিউরিটি কোড দিন।</p>
+
+            <form id="adminLoginForm" class="mt-5 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">সিকিউরিটি কোড</label>
+                    <input type="password" id="securityCodeInput" required autocomplete="off" placeholder="••••••••" class="w-full px-4 py-3.5 rounded-xl border-2 border-slate-200 focus:border-teal-600 outline-none text-center text-2xl font-bold tracking-[0.4em] font-inter">
+                    <p id="securityErrorMsg" class="hidden text-rose-600 text-xs font-semibold mt-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span id="securityErrorText">ভুল সিকিউরিটি কোড!</span>
+                    </p>
+                </div>
+
+                <button type="submit" id="adminLoginSubmitBtn" class="w-full bg-slate-900 hover:bg-teal-700 disabled:bg-slate-400 text-white font-bold py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-unlock-keyhole"></i>
+                    <span>যাচাই ও প্রবেশ করুন</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- FULL ADMIN CONTROL PANEL MODAL -->
+    <!-- ===================================================================== -->
+    <div id="adminDashboardModal" class="fixed inset-0 z-50 hidden bg-slate-950/90 backdrop-blur-md overflow-y-auto">
+        <div class="min-h-screen flex flex-col">
+            <!-- Admin Top Header -->
+            <div class="bg-slate-900 text-white border-b border-slate-800 px-4 sm:px-8 py-4 sticky top-0 z-10">
+                <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <span id="adminCloudStatusPill" class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-xl font-inter font-medium">
+                            🟡 Local Mode
+                        </span>
+                        <button onclick="closeAdminDashboard()" class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span>লগআউট ও সাইট দেখুন</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Body -->
+            <div class="max-w-7xl w-full mx-auto px-4 sm:px-8 py-6 flex-1">
+                
+                <!-- Admin Navigation Tabs -->
+                <div class="flex flex-wrap gap-2 mb-6 bg-slate-900/70 p-2 rounded-2xl border border-slate-800">
+                    <button onclick="switchAdminTab('orders')" class="admin-tab-btn active px-4 py-2.5 rounded-xl text-sm font-semibold bg-teal-600 text-white transition flex items-center gap-2" data-tab="orders">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                        <span>অর্ডার ও রশিদ (Live)</span>
+                        <span id="adminOrderCountBadge" class="bg-amber-400 text-slate-950 text-xs font-bold px-2 py-0.5 rounded-full font-inter">0</span>
+                    </button>
+                    <button onclick="switchAdminTab('products')" class="admin-tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 transition flex items-center gap-2" data-tab="products">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                        <span>পণ্য ও ছবি ম্যানেজমেন্ট</span>
+                    </button>
+                    <button onclick="switchAdminTab('private-notice')" class="admin-tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 transition flex items-center gap-2" data-tab="private-notice">
+                        <i class="fa-solid fa-user-secret"></i>
+                        <span>প্রাইভেট ইনভয়েস ও নোটিশ</span>
+                    </button>
+                    <button onclick="switchAdminTab('payments')" class="admin-tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 transition flex items-center gap-2" data-tab="payments">
+                        <i class="fa-solid fa-wallet"></i>
+                        <span>পেমেন্ট অ্যাকাউন্ট</span>
+                    </button>
+                    <button onclick="switchAdminTab('cloud')" class="admin-tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 transition flex items-center gap-2" data-tab="cloud">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span>ক্লাউড সিঙ্ক সেটিংস (Firebase)</span>
+                    </button>
+                    <button onclick="switchAdminTab('settings')" class="admin-tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 transition flex items-center gap-2" data-tab="settings">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>সাইট সেটিংস ও নিরাপত্তা</span>
+                    </button>
+                </div>
+
+                <!-- TAB 1: CONFIDENTIAL ORDERS & PAYMENT RECEIPTS -->
+                <div id="tab-orders" class="admin-tab-content bg-white rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">গোপন অর্ডার ও পেমেন্ট ভেরিফিকেশন তালিকা</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">কাস্টমাররা ওয়েবসাইটে অর্ডার করলে রিয়েল-টাইমে এখানে জমা হবে। ভিজিটররা এই তালিকা দেখতে পাবে না।</p>
+                        </div>
+                    </div>
+
+                    <div id="adminOrdersContainer" class="space-y-4">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- TAB 2: PRODUCTS & IMAGE UPLOAD MANAGEMENT -->
+                <div id="tab-products" class="admin-tab-content hidden bg-white rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+                    <form id="adminProductForm" class="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+                        <input type="hidden" id="editProdId">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">পণ্যের নাম *</label>
+                                <input type="text" id="prodName" required placeholder="Fujifilm DI-HL Dry Film" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">সাইজ ও প্যাক *</label>
+                                <input type="text" id="prodSize" required placeholder="10×12 Inch (150 Sheets)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">মূল্য (৳) *</label>
+                                <input type="number" id="prodPrice" required placeholder="6850" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white font-inter">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">স্টক অবস্থা *</label>
+                                <select id="prodStatus" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
+                                    <option value="In Stock">In Stock (স্টকে আছে)</option>
+                                    <option value="Limited">Limited (সীমিত স্টক)</option>
+                                    <option value="Stock Out">Stock Out (স্টক শেষ)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Image Upload & URL Input Row -->
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center pt-2 border-t border-slate-200/80">
+                            <div class="lg:col-span-4">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">
+                                    <i class="fa-solid fa-upload text-teal-600 mr-1"></i> ডিভাইস থেকে ছবি আপলোড করুন
+                                </label>
+                                <input type="file" id="prodImageFile" accept="image/*" onchange="handleProductImageUpload(event)" class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-teal-600 file:text-white hover:file:bg-teal-700 bg-white border border-slate-300 rounded-xl p-1 cursor-pointer">
+                            </div>
+
+                            <div class="lg:col-span-4">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">অথবা ছবির সরাসরি লিংক (Image URL)</label>
+                                <input type="url" id="prodImageUrl" oninput="previewImageFromUrl(this.value)" placeholder="https://example.com/film.jpg" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white font-inter">
+                            </div>
+
+                            <!-- Live Thumbnail Preview -->
+                            <div class="lg:col-span-2 flex items-center gap-3">
+                                <div id="prodImagePreviewBox" class="w-16 h-16 rounded-xl border-2 border-dashed border-slate-300 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                                    <i class="fa-solid fa-image text-slate-300 text-xl"></i>
+                                </div>
+                                <div class="text-xs">
+                                    <p class="font-semibold text-slate-700">ছবি প্রিভিউ</p>
+                                    <button type="button" onclick="clearProductImage()" class="text-rose-600 hover:underline mt-0.5">ছবি মুছুন</button>
+                                </div>
+                            </div>
+
+                            <div class="lg:col-span-2 flex gap-2 justify-end">
+                                <button type="submit" id="prodSubmitBtn" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-sm">
+                                    + পণ্য সেভ করুন
+                                </button>
+                                <button type="button" id="prodCancelEditBtn" onclick="resetProductForm()" class="hidden bg-slate-300 hover:bg-slate-400 text-slate-800 font-semibold py-3 px-3 rounded-xl text-sm">
+                                    বাতিল
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Admin Product List Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-xs font-bold uppercase text-slate-500 bg-slate-50">
+                                    <th class="py-3 px-4">ছবি</th>
+                                    <th class="py-3 px-4">পণ্যের নাম</th>
+                                    <th class="py-3 px-4">সাইজ ও প্যাক</th>
+                                    <th class="py-3 px-4">মূল্য (৳)</th>
+                                    <th class="py-3 px-4">স্টক স্ট্যাটাস</th>
+                                    <th class="py-3 px-4 text-right">অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminProductsTableBody" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 2: CONFIDENTIAL ORDERS & PAYMENT RECEIPTS -->
+                <div id="tab-orders" class="admin-tab-content hidden bg-white rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">গোপন অর্ডার ও পেমেন্ট ভেরিফিকেশন তালিকা</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">এই তালিকাটি পাবলিক ভিজিটরদের থেকে সম্পূর্ণ গোপন রাখা হয়েছে। শুধুমাত্র আপনি এখানে দেখতে পাবেন।</p>
+                        </div>
+                    </div>
+
+                    <div id="adminOrdersContainer" class="space-y-4">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- TAB 3: PRIVATE CLIENT INVOICE & NOTICE (ADMIN ONLY) -->
+                <div id="tab-private-notice" class="admin-tab-content hidden bg-white rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-lg mb-1">
+                                <i class="fa-solid fa-eye-slash"></i> ভিজিটরদের জন্য লুকানো (Admin Confidential)
+                            </span>
+                            <h3 class="text-xl font-bold text-slate-900">প্রাইভেট ক্লায়েন্ট বকেয়া ইনভয়েস ও নোটিশ ম্যানেজার</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">নির্দিষ্ট গ্রাহকের (যেমন: রবিন ট্রেড ইন্টারন্যাশনাল) বকেয়া তথ্য এখানে সংরক্ষণ করুন এবং সরাসরি প্রিন্ট বা হোয়াটসঅ্যাপে পাঠান।</p>
+                        </div>
+                    </div>
+
+                    <form id="adminPrivateClientForm" class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">গ্রাহক / প্রতিষ্ঠানের নাম</label>
+                                <input type="text" id="admClientName" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">বকেয়া টাকার পরিমাণ (৳)</label>
+                                <input type="number" id="admClientDueAmount" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white font-inter">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">গ্রাহকের হোয়াটসঅ্যাপ নম্বর</label>
+                                <input type="text" id="admClientPhone" placeholder="88017XXXXXXXX" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white font-inter">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">নোটিশ / ইনভয়েস শিরোনাম</label>
+                            <input type="text" id="admClientTitle" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">বিস্তারিত বার্তা ও পেমেন্ট নির্দেশনা</label>
+                            <textarea id="admClientMessage" rows="3" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white"></textarea>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                            <div class="flex flex-wrap gap-2.5">
+                                <button type="button" onclick="previewPrivateClientInvoice()" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition">
+                                    <i class="fa-solid fa-print"></i> প্রাইভেট ইনভয়েস প্রিন্ট / PDF
+                                </button>
+                                <button type="button" onclick="sendPrivateNoticeWhatsapp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition">
+                                    <i class="fa-brands fa-whatsapp text-base"></i> গ্রাহককে WhatsApp-এ পাঠান
+                                </button>
+                            </div>
+                            <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-sm transition">
+                                তথ্য সেভ করুন
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- TAB 4: PAYMENT ACCOUNTS & VISIBILITY TOGGLE -->
+                <div id="tab-payments" class="admin-tab-content hidden bg-white rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">পেমেন্ট অ্যাকাউন্ট নম্বর ও পাবলিক দৃশ্যমানতা</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">আপনি চাইলে পাবলিক পেজে পেমেন্ট নম্বর দেখাতে পারেন অথবা সম্পূর্ণ লুকিয়ে রাখতে পারেন।</p>
+                        </div>
+
+                        <!-- Master Toggle for Public Payment Section -->
+                        <label class="inline-flex items-center gap-3 bg-slate-100 px-4 py-2.5 rounded-2xl border border-slate-200 cursor-pointer">
+                            <input type="checkbox" id="admShowPublicPayments" onchange="togglePublicPaymentsVisibility(this.checked)" class="w-4 h-4 accent-teal-600">
+                            <span class="text-sm font-bold text-slate-800">ভিজিটরদের পেমেন্ট নম্বর দেখান</span>
+                        </label>
+                    </div>
+
+                    <!-- Add Payment Method Form -->
+                    <form id="adminPaymentForm" class="bg-slate-50 border border-slate-200 rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">মাধ্যমের নাম *</label>
+                            <input type="text" id="payProvider" required placeholder="bKash / Nagad / DBBL Bank" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">অ্যাকাউন্ট ধরন *</label>
+                            <input type="text" id="payType" required placeholder="Merchant / Personal / Current A/C" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">অ্যাকাউন্ট নম্বর *</label>
+                            <input type="text" id="payNumber" required placeholder="017XXXXXXXX" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white font-inter">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">অতিরিক্ত তথ্য (শাখা/হোল্ডার)</label>
+                            <input type="text" id="payNote" placeholder="MediFilm BD - Motijheel Br." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
+                        </div>
+                        <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition">
+                            + অ্যাকাউন্ট যোগ করুন
+                        </button>
+                    </form>
+
+                    <div id="adminPaymentsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- TAB 5: FIREBASE REALTIME CLOUD SYNC SETTINGS -->
+                <div id="tab-cloud" class="admin-tab-content hidden bg-white rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold bg-teal-50 text-teal-700 border border-teal-200 px-2.5 py-1 rounded-lg mb-1">
+                                <i class="fa-solid fa-globe"></i> রিয়েল-টাইম লাইভ ডাটাবেজ সংযোগ
+                            </span>
+                            <h3 class="text-xl font-bold text-slate-900">Firebase Cloud Sync সেটআপ (সব ডিভাইসে লাইভ আপডেটের জন্য)</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">আপনার ফ্রি Firebase Realtime Database-এর কনফিগ কোড এখানে বসালে পৃথিবীর যেকোনো ডিভাইস থেকে লাইভ আপডেট ও অর্ডার পাবেন।</p>
+                        </div>
+                        <div id="cloudTabStatusBox" class="px-4 py-2.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">
+                            স্ট্যাটাস: বর্তমানে লোকাল মোডে চলছে
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Left: Paste Firebase Config Form -->
+                        <div class="lg:col-span-7 bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+                            <form id="firebaseConfigForm" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-800 mb-1">
+                                        Firebase Config কোড পেস্ট করুন <span class="text-xs font-normal text-slate-500">(সম্পূর্ণ <code>const firebaseConfig = { ... }</code> পেস্ট করলেও অটো-ডিটেক্ট হবে)</span>
+                                    </label>
+                                    <textarea id="firebaseConfigInput" rows="7" placeholder='{
+  apiKey: "AIzaSy...",
+  authDomain: "medifilmbd.firebaseapp.com",
+  databaseURL: "https://medifilmbd-default-rtdb.firebaseio.com",
+  projectId: "medifilmbd",
+  storageBucket: "medifilmbd.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef"
+}' class="w-full p-3.5 rounded-xl border border-slate-300 focus:border-teal-600 outline-none text-xs font-inter bg-white"></textarea>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-5 py-3 rounded-xl text-sm shadow-md transition flex items-center gap-2">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                                        <span>ক্লাউডে কানেক্ট ও সিঙ্ক করুন</span>
+                                    </button>
+                                    <button type="button" onclick="pushLocalDataToFirebase()" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 py-3 rounded-xl text-sm transition flex items-center gap-2">
+                                        <i class="fa-solid fa-upload"></i>
+                                        <span>বর্তমান ডাটা ক্লাউডে পাঠান</span>
+                                    </button>
+                                    <button type="button" onclick="disconnectFirebaseCloud()" class="bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-semibold px-4 py-3 rounded-xl text-xs transition">
+                                        ডিসকানেক্ট
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Right: 2-Minute Step-by-Step Guide in Bengali -->
+                        <div class="lg:col-span-5 bg-teal-950 text-white rounded-2xl p-6 space-y-4">
+                            <h4 class="font-bold text-lg text-teal-300 flex items-center gap-2">
+                                <i class="fa-solid fa-book-open"></i>
+                                মাত্র ২ মিনিটে ফ্রি Firebase সেটআপ গাইড:
+                            </h4>
+                            <ol class="space-y-3 text-xs sm:text-sm text-slate-200 list-decimal list-inside leading-relaxed">
+                                <li>গুগল অ্যাকাউন্ট দিয়ে <a href="https://console.firebase.google.com/" target="_blank" class="text-teal-300 underline font-inter">console.firebase.google.com</a> এ যান এবং <strong>Create a project</strong> ক্লিক করুন।</li>
+                                <li>বাম পাশের মেনু থেকে <strong>Build → Realtime Database</strong> সিলেক্ট করে <strong>Create Database</strong> দিন এবং <strong>Test Mode</strong> চালু করুন।</li>
+                                <li>প্রজেক্ট ওভারভিউ থেকে <strong>Web (&lt;/&gt;)</strong> আইকনে ক্লিক করে অ্যাপ রেজিস্টার করলে যে <code>firebaseConfig</code> কোডটি পাবেন, তা কপি করে বাম পাশের বক্সে পেস্ট করুন।</li>
+                                <li><strong>"ক্লাউডে কানেক্ট ও সিঙ্ক করুন"</strong> বাটনে ক্লিক করলেই আপনার Netlify ওয়েবসাইটটি ১০০% লাইভ ক্লাউড ডাটাবেজের সাথে যুক্ত হয়ে যাবে!</li>
+                            </ol>
+                            <div class="bg-white/10 border border-white/15 rounded-xl p-3 text-xs text-teal-100">
+                                <i class="fa-solid fa-circle-info text-teal-300 mr-1"></i>
+                                টিপস: একবার কানেক্ট করার পর আপনি ব্যাকআপ থেকে JSON ডাউনলোড করে রাখলে ভবিষ্যতে নতুন ব্রাউজারে এক ক্লিকেই সেটআপ করতে পারবেন।
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 6: COMPREHENSIVE SITE SETTINGS, SECURITY & BACKUP -->
+                <div id="tab-settings" class="admin-tab-content hidden bg-white rounded-3xl p-6 sm:p-8 shadow-xl space-y-8">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-900 border-b border-slate-100 pb-3">সাইট সেটিংস, ব্র্যান্ডিং ও যোগাযোগ তথ্য পরিবর্তন</h3>
+                        
+                        <form id="adminGeneralForm" class="mt-5 space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">প্রতিষ্ঠানের নাম (Brand Name)</label>
+                                    <input type="text" id="admBrandName" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-inter">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">ট্যাগলাইন (Tagline)</label>
+                                    <input type="text" id="admTagline" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">ফুটার কপিরাইট টেক্সট</label>
+                                    <input type="text" id="admCopyright" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">হটলাইন ফোন নম্বর</label>
+                                    <input type="text" id="admPhone" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-inter">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">WhatsApp নম্বর (88017...)</label>
+                                    <input type="text" id="admWhatsapp" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-inter">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">অফিসিয়াল ইমেইল</label>
+                                    <input type="email" id="admEmail" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-inter">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">অফিস ঠিকানা</label>
+                                    <input type="text" id="admAddress" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm">
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-sm font-bold text-slate-800">টপ অ্যানাউন্সমেন্ট বার (জরুরি বিজ্ঞপ্তি)</label>
+                                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" id="admShowTopNotice" class="w-4 h-4 accent-teal-600">
+                                        <span class="text-xs font-bold text-slate-700">ওয়েবসাইটে দেখান</span>
+                                    </label>
+                                </div>
+                                <input type="text" id="admTopNotice" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white">
+                            </div>
+
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-3 rounded-xl shadow-md transition flex items-center gap-2">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                    <span>সব সেটিংস সেভ করুন</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Security Code & JSON Backup Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-6 border-t border-slate-200">
+                        <!-- Change Security Code -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+                            <h4 class="font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-key text-teal-600"></i>
+                                অ্যাডমিন সিকিউরিটি কোড পরিবর্তন
+                            </h4>
+                            <form id="adminSecurityForm" class="space-y-3">
+                                <input type="password" id="currentSecCode" required placeholder="বর্তমান সিকিউরিটি কোড" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white font-inter">
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <input type="password" id="newSecCode" minlength="4" required placeholder="নতুন কোড (৪+ ডিজিট)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white font-inter">
+                                    <input type="password" id="confirmSecCode" minlength="4" required placeholder="পুনরায় নতুন কোড" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white font-inter">
+                                </div>
+                                <button type="submit" class="bg-slate-900 hover:bg-teal-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">
+                                    সিকিউরিটি কোড আপডেট করুন
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Data Backup & Restore -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-slate-900 mb-2 flex items-center gap-2">
+                                    <i class="fa-solid fa-database text-teal-600"></i>
+                                    ডাটা ব্যাকআপ, রিস্টোর ও রিসেট
+                                </h4>
+                                <p class="text-xs text-slate-600 mb-4">আপনার সব পণ্য, ছবি ও অর্ডারের ডাটা JSON ফাইল হিসেবে ডাউনলোড করে সংরক্ষণ করুন অথবা অন্য ডিভাইসে ইমপোর্ট করুন।</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2.5">
+                                <button type="button" onclick="exportBackupJson()" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition">
+                                    <i class="fa-solid fa-download"></i> ব্যাকআপ ডাউনলোড (JSON)
+                                </button>
+                                <label class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer transition">
+                                    <i class="fa-solid fa-upload"></i> ব্যাকআপ ইমপোর্ট
+                                    <input type="file" accept=".json" onchange="importBackupJson(event)" class="hidden">
+                                </label>
+                                <button type="button" onclick="resetAllToDefault()" class="bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-semibold px-3.5 py-2.5 rounded-xl text-xs transition">
+                                    রিসেট
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- PRINTABLE INVOICE MODAL -->
+    <!-- ===================================================================== -->
+    <div id="invoiceModal" class="fixed inset-0 z-[60] hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative">
+            <div class="flex justify-between items-center mb-4 no-print">
+                <span class="text-sm font-bold text-slate-500">কাস্টমার ইনভয়েস প্রিভিউ</span>
+                <div class="flex gap-2">
+                    <button onclick="window.print()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-print"></i> প্রিন্ট / PDF
+                    </button>
+                    <button onclick="document.getElementById('invoiceModal').classList.add('hidden')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-sm">
+                        বন্ধ করুন
+                    </button>
+                </div>
+            </div>
+
+            <div id="printableInvoiceArea" class="border border-slate-200 rounded-xl p-6 space-y-6">
+                <div class="flex justify-between items-start border-b border-slate-200 pb-4">
+                    <div>
+                        <h2 id="invBrandName" class="text-2xl font-bold text-slate-900 font-inter">MediFilm BD</h2>
+                        <p class="text-xs text-slate-500">মেডিকেল ড্রাই ফিল্ম ও ডায়াগনস্টিক ইমেজিং সাপ্লায়ার</p>
+                        <p id="invPhone" class="text-xs text-slate-600 font-inter mt-1"></p>
+                    </div>
+                    <div class="text-right">
+                        <span class="bg-teal-50 text-teal-800 border border-teal-200 px-3 py-1 rounded-lg text-xs font-bold">INVOICE / BILL</span>
+                        <p class="text-xs text-slate-500 mt-2 font-inter">Order ID: <strong id="invOrderId" class="text-slate-900"></strong></p>
+                        <p class="text-xs text-slate-500 font-inter">Date: <span id="invDate"></span></p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase font-bold">বিল প্রাপক (Bill To):</p>
+                        <p id="invInstitution" class="font-bold text-slate-900 text-base mt-0.5"></p>
+                        <p id="invContact" class="text-slate-600"></p>
+                        <p id="invClientPhone" class="text-slate-600 font-inter"></p>
+                        <p id="invAddress" class="text-slate-600 text-xs mt-1"></p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-slate-400 uppercase font-bold">পেমেন্ট তথ্য:</p>
+                        <p class="text-slate-700 mt-0.5">মাধ্যম: <strong id="invPayMethod"></strong></p>
+                        <p class="text-slate-700 font-inter text-xs">TrxID: <strong id="invTrxId"></strong></p>
+                        <p class="mt-1">স্ট্যাটাস: <span id="invStatus" class="px-2 py-0.5 rounded text-xs font-bold bg-slate-100"></span></p>
+                    </div>
+                </div>
+
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 border-y border-slate-200">
+                            <th class="py-2.5 px-3">পণ্যের বিবরণ</th>
+                            <th class="py-2.5 px-3 text-center">পরিমাণ</th>
+                            <th class="py-2.5 px-3 text-right">মোট টাকা (৳)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-slate-200">
+                            <td id="invProduct" class="py-3 px-3 font-medium"></td>
+                            <td id="invQty" class="py-3 px-3 text-center font-inter"></td>
+                            <td id="invTotal" class="py-3 px-3 text-right font-bold font-inter"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="flex justify-between items-center pt-2 text-xs text-slate-500">
+                    <p>ধন্যবাদান্তে, MediFilm BD কর্তৃপক্ষ</p>
+                    <p>অনুমোদিত স্বাক্ষর</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- APPLICATION LOGIC & STATE MANAGEMENT -->
+    <!-- ===================================================================== -->
+    <script>
+        const STORAGE_KEY = 'medifilmbd_portal_state_v2';
+
+        // Default Initial State
+        const defaultState = {
+            securityCode: '2026',
+            settings: {
+                brandName: 'MediFilm BD',
+                tagline: 'মেডিকেল ড্রাই ফিল্ম ও ডায়াগনস্টিক ইমেজিং সাপ্লায়ার',
+                copyright: 'স্বত্ব © ২০২৬ সর্বস্বত্ব সংরক্ষিত | মেডিকেল ইমেজিং সলিউশন',
+                phone: '+880 1711-000000',
+                whatsapp: '8801711000000',
+                email: 'sales@medifilmbd.com',
+                address: 'মতিঝিল বাণিজ্যিক এলাকা, ঢাকা-১০০০',
+                showTopNotice: true,
+                topNotice: 'বিজ্ঞপ্তি: Fujifilm DI-HL মেডিকেল ড্রাই ফিল্মের সকল সাইজের হোলসেল প্রি-অর্ডার চলছে। সারা দেশে ২৪ ঘণ্টায় কুরিয়ার ডেলিভারি।',
+                showPublicPayments: true,
+                // Private Client Data (Strictly Admin-Only)
+                clientName: 'রবিন ট্রেড ইন্টারন্যাশনাল',
+                clientDueAmount: 34250,
+                clientPhone: '8801712345678',
+                clientTitle: 'প্রি-অর্ডার হট সেল স্টক ও বকেয়া ইনভয়েস পরিশোধ সংক্রান্ত বিজ্ঞপ্তি',
+                clientMessage: 'প্রি-অর্ডার হট সেল স্টক অত্যন্ত সীমিত থাকায় দ্রুত আপনার ইনভয়েসের বকেয়া বিল পরিশোধ করে বরাদ্দকৃত মাল নিশ্চিত করার জন্য অনুরোধ করা যাচ্ছে।'
+            },
+            products: [
+                {
+                    id: 'prod-1',
+                    name: 'Fujifilm DI-HL Medical Dry Film',
+                    size: '8×10 Inch (150 Sheets / Box)',
+                    price: 5400,
+                    status: 'In Stock',
+                    image: ''
+                },
+                {
+                    id: 'prod-2',
+                    name: 'Fujifilm DI-HL Medical Dry Film',
+                    size: '10×12 Inch (150 Sheets / Box)',
+                    price: 6850,
+                    status: 'Limited',
+                    image: ''
+                },
+                {
+                    id: 'prod-3',
+                    name: 'Fujifilm DI-HL Medical Dry Film',
+                    size: '11×14 Inch (150 Sheets / Box)',
+                    price: 8200,
+                    status: 'In Stock',
+                    image: ''
+                },
+                {
+                    id: 'prod-4',
+                    name: 'Fujifilm DI-HL Medical Dry Film',
+                    size: '14×17 Inch (100 Sheets / Box)',
+                    price: 7900,
+                    status: 'Limited',
+                    image: ''
+                }
+            ],
+            paymentAccounts: [
+                {
+                    id: 'pay-1',
+                    provider: 'bKash (বিকাশ)',
+                    type: 'Merchant / Personal',
+                    number: '01711-000000',
+                    note: 'Send Money / Payment করুন'
+                },
+                {
+                    id: 'pay-2',
+                    provider: 'Nagad (নগদ)',
+                    type: 'Personal / Merchant',
+                    number: '01711-000000',
+                    note: 'দ্রুত ভেরিফিকেশনের জন্য রেফারেন্স দিন'
+                },
+                {
+                    id: 'pay-3',
+                    provider: 'Rocket (রকেট)',
+                    type: 'DBBL Mobile Banking',
+                    number: '01711-0000009',
+                    note: 'রকেট অ্যাকাউন্ট নম্বর'
+                },
+                {
+                    id: 'pay-4',
+                    provider: 'Dutch-Bangla Bank (DBBL)',
+                    type: 'Current Account',
+                    number: '101.110.0045892',
+                    note: 'A/C Name: MediFilm BD'
+                }
+            ],
+            orders: [
+                {
+                    id: 'MF-2026-101',
+                    date: '১২ নভেম্বর, ২০২৬',
+                    institution: 'রবিন ট্রেড ইন্টারন্যাশনাল',
+                    contactPerson: 'মোঃ রবিন হোসেন',
+                    phone: '01712-345678',
+                    productName: 'Fujifilm DI-HL Medical Dry Film (10×12 Inch)',
+                    quantity: 5,
+                    totalAmount: 34250,
+                    paymentMethod: 'Bank Transfer',
+                    trxId: 'DBBL9928371',
+                    address: 'মতিঝিল বাণিজ্যিক এলাকা, ঢাকা',
+                    status: 'Pending'
+                }
+            ]
+        };
+
+        let appState = loadState();
+        let currentProductFilter = 'ALL';
+        let currentUploadedImageBase64 = '';
+        let failedAttempts = 0;
+        let lockoutUntil = 0;
+
+        // =====================================================================
+        // REAL-TIME BENGALI CLOCK & DATE (BANGLADESH STANDARD TIME - BST)
+        // =====================================================================
+        function updateBengaliClock() {
+            const clockEl = document.getElementById('liveBengaliClock');
+            if (!clockEl) return;
+
+            const now = new Date();
+            const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+            const toBn = (str) => String(str).replace(/\d/g, d => bnDigits[d]);
+
+            const bnMonths = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+            const bnDays = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
+
+            // Convert to Asia/Dhaka (UTC+6) explicitly
+            const dhakaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Dhaka' }));
+            const dayName = bnDays[dhakaTime.getDay()];
+            const day = toBn(dhakaTime.getDate());
+            const month = bnMonths[dhakaTime.getMonth()];
+            const year = toBn(dhakaTime.getFullYear());
+
+            let hours = dhakaTime.getHours();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            const hh = toBn(String(hours).padStart(2, '0'));
+            const mm = toBn(String(dhakaTime.getMinutes()).padStart(2, '0'));
+            const ss = toBn(String(dhakaTime.getSeconds()).padStart(2, '0'));
+
+            clockEl.textContent = `${dayName}, ${day} ${month} ${year} | ${hh}:${mm}:${ss} ${ampm}`;
+        }
+        setInterval(updateBengaliClock, 1000);
+        updateBengaliClock();
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    return {
+                        ...defaultState,
+                        ...parsed,
+                        settings: { ...defaultState.settings, ...(parsed.settings || {}) }
+                    };
+                }
+            } catch (e) {
+                console.error('Error loading state:', e);
+            }
+            return JSON.parse(JSON.stringify(defaultState));
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                renderAll();
+            } catch (e) {
+                showToast('স্টোরেজ পূর্ণ! অনুগ্রহ করে ছোট সাইজের ছবি ব্যবহার করুন।', 'error');
+            }
+        }
+
+        // Toast Notification Helper
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-rose-600' : 'bg-slate-900 border border-teal-500/40';
+            const icon = type === 'error' ? 'fa-circle-exclamation text-white' : 'fa-circle-check text-teal-400';
+
+            toast.className = `${bgClass} text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 text-sm font-medium transform transition-all duration-300 translate-x-0 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-x-4');
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        // Copy to Clipboard Helper (iFrame Safe)
+        function copyText(text, label) {
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast(`${label} নম্বর কপি করা হয়েছে: ${text}`);
+        }
+
+        // Render All UI Sections
+        function renderAll() {
+            renderSettings();
+            renderProducts();
+            renderPaymentAccounts();
+            renderOrderProductDropdown();
+            renderAdminPanels();
+        }
+
+        function renderSettings() {
+            const s = appState.settings;
+            document.getElementById('displayBrandName').textContent = s.brandName;
+            document.getElementById('footerBrandName').textContent = s.brandName;
+            document.getElementById('footerCopyrightText').textContent = s.copyright;
+            document.getElementById('displayTagline').textContent = s.tagline;
+            
+            // Top Notice Visibility
+            const topNoticeBar = document.getElementById('topNoticeBar');
+            if (s.showTopNotice && s.topNotice) {
+                topNoticeBar.classList.remove('hidden');
+                document.getElementById('displayTopNotice').textContent = s.topNotice;
+            } else {
+                topNoticeBar.classList.add('hidden');
+            }
+            
+            document.getElementById('displayTopPhone').textContent = s.phone;
+            document.getElementById('topPhoneLink').href = `tel:${s.phone}`;
+            document.getElementById('heroCardPhone').textContent = s.phone;
+            document.getElementById('displayCardPhone').textContent = s.phone;
+            document.getElementById('cardPhoneLink').href = `tel:${s.phone}`;
+            document.getElementById('displayCardEmail').textContent = s.email;
+            document.getElementById('displayCardAddress').textContent = s.address;
+
+            const cleanWa = s.whatsapp.replace(/[^0-9]/g, '');
+            const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent('আসসালামু আলাইকুম MediFilm BD, আমি মেডিকেল ড্রাই ফিল্ম অর্ডার সম্পর্কে জানতে চাই।')}`;
+            
+            document.getElementById('heroWhatsappBtn').href = waUrl;
+            document.getElementById('cardWhatsappLink').href = waUrl;
+            document.getElementById('floatingWhatsappBtn').href = waUrl;
+            document.getElementById('displayCardWhatsapp').textContent = `+${cleanWa}`;
+
+            // Public Payment Section Visibility
+            const paySection = document.getElementById('payment-accounts');
+            const navPayLink = document.getElementById('navPaymentLink');
+            const footPayLink = document.getElementById('footerPaymentLink');
+            if (s.showPublicPayments) {
+                paySection.classList.remove('hidden');
+                navPayLink.classList.remove('hidden');
+                footPayLink.classList.remove('hidden');
+            } else {
+                paySection.classList.add('hidden');
+                navPayLink.classList.add('hidden');
+                footPayLink.classList.add('hidden');
+            }
+        }
+
+        function filterProducts(status) {
+            currentProductFilter = status;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.filter === status) {
+                    btn.className = 'filter-btn active px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-white transition';
+                } else {
+                    btn.className = 'filter-btn px-4 py-2 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition';
+                }
+            });
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const filtered = currentProductFilter === 'ALL'
+                ? appState.products
+                : appState.products.filter(p => p.status === currentProductFilter);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 bg-white rounded-2xl border border-slate-200">এই ক্যাটাগরিতে বর্তমানে কোনো পণ্য নেই।</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(prod => {
+                let badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                let badgeText = 'In Stock (স্টকে আছে)';
+                if (prod.status === 'Limited') {
+                    badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
+                    badgeText = 'Limited Stock (সীমিত)';
+                } else if (prod.status === 'Stock Out') {
+                    badgeClass = 'bg-rose-50 text-rose-700 border-rose-200';
+                    badgeText = 'Stock Out (স্টক শেষ)';
+                }
+
+                const imageSection = prod.image
+                    ? `<div class="relative w-full h-44 rounded-xl overflow-hidden bg-slate-100 mb-4 border border-slate-100">
+                           <img src="${prod.image}" alt="${prod.name}" onerror="this.parentElement.innerHTML='<div class=\\'w-full h-full flex flex-col items-center justify-center text-teal-700 bg-teal-50/60\\'><i class=\\'fa-solid fa-x-ray text-3xl mb-1\\'></i><span class=\\'text-xs font-medium\\'>Medical Dry Film</span></div>'" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                           <span class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg text-xs font-semibold border shadow-sm backdrop-blur-md bg-white/90 ${badgeClass}">
+                               ${badgeText}
+                           </span>
+                       </div>`
+                    : `<div class="relative w-full h-44 rounded-xl bg-gradient-to-br from-slate-100 to-teal-50/70 mb-4 border border-slate-200/60 flex flex-col items-center justify-center text-teal-700">
+                           <div class="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-2xl text-teal-600 mb-2 group-hover:scale-110 transition">
+                               <i class="fa-solid fa-x-ray"></i>
+                           </div>
+                           <span class="text-xs font-semibold text-slate-500">Medical Diagnostic Film</span>
+                           <span class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg text-xs font-semibold border ${badgeClass}">
+                               ${badgeText}
+                           </span>
+                       </div>`;
+
+                return `
+                    <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-teal-300 transition flex flex-col justify-between group">
+                        <div>
+                            ${imageSection}
+                            <h3 class="font-bold text-slate-900 text-lg leading-snug font-inter">${prod.name}</h3>
+                            <p class="text-sm text-teal-700 font-semibold mt-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-ruler-combined text-xs"></i>
+                                <span>${prod.size}</span>
+                            </p>
+                        </div>
+
+                        <div class="mt-5 pt-4 border-t border-slate-100">
+                            <div class="flex items-baseline justify-between mb-3">
+                                <span class="text-xs text-slate-500">প্রতি বক্স মূল্য</span>
+                                <span class="text-2xl font-bold text-slate-900 font-inter">৳${Number(prod.price).toLocaleString()}</span>
+                            </div>
+                            <button onclick="selectProductForOrder('${prod.id}')" class="w-full py-2.5 px-4 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 ${prod.status === 'Stock Out' ? 'bg-slate-200 text-slate-600 hover:bg-slate-300' : 'bg-slate-900 hover:bg-teal-600 text-white'}">
+                                <i class="fa-solid fa-bag-shopping"></i>
+                                <span>${prod.status === 'Stock Out' ? 'প্রি-অর্ডার বুকিং দিন' : 'অর্ডার করুন'}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderPaymentAccounts() {
+            const grid = document.getElementById('paymentAccountsGrid');
+            grid.innerHTML = appState.paymentAccounts.map(acc => {
+                let accentColor = 'border-slate-200 bg-slate-50/60';
+                let iconClass = 'fa-building-columns text-slate-700 bg-slate-200';
+                
+                const lower = acc.provider.toLowerCase();
+                if (lower.includes('bkash') || lower.includes('বিকাশ')) {
+                    accentColor = 'border-pink-200 bg-pink-50/40';
+                    iconClass = 'fa-mobile-screen-button text-pink-600 bg-pink-100';
+                } else if (lower.includes('nagad') || lower.includes('নগদ')) {
+                    accentColor = 'border-orange-200 bg-orange-50/40';
+                    iconClass = 'fa-wallet text-orange-600 bg-orange-100';
+                } else if (lower.includes('rocket') || lower.includes('রকেট')) {
+                    accentColor = 'border-purple-200 bg-purple-50/40';
+                    iconClass = 'fa-paper-plane text-purple-600 bg-purple-100';
+                } else {
+                    accentColor = 'border-teal-200 bg-teal-50/40';
+                    iconClass = 'fa-building-columns text-teal-700 bg-teal-100';
+                }
+
+                return `
+                    <div class="rounded-2xl border ${accentColor} p-5 flex flex-col justify-between transition hover:shadow-md">
+                        <div>
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl ${iconClass} flex items-center justify-center text-lg shrink-0">
+                                    <i class="fa-solid ${iconClass.split(' ')[0]}"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 leading-tight">${acc.provider}</h4>
+                                    <span class="text-xs text-slate-500 font-medium">${acc.type}</span>
+                                </div>
+                            </div>
+                            <div class="bg-white border border-slate-200/80 rounded-xl px-3.5 py-2.5 flex items-center justify-between gap-2 my-2">
+                                <span class="font-inter font-bold text-base text-slate-900 tracking-wide select-all">${acc.number}</span>
+                                <button onclick="copyText('${acc.number}', '${acc.provider}')" class="text-xs font-bold bg-slate-900 hover:bg-teal-600 text-white px-2.5 py-1.5 rounded-lg transition shrink-0 flex items-center gap-1">
+                                    <i class="fa-regular fa-copy"></i> কপি
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">${acc.note || ''}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderOrderProductDropdown() {
+            const select = document.getElementById('ordProductSelect');
+            select.innerHTML = appState.products.map(p => 
+                `<option value="${p.id}" data-price="${p.price}">${p.name} - ${p.size} (৳${p.price})</option>`
+            ).join('');
+            calculateOrderTotal();
+        }
+
+        function selectProductForOrder(prodId) {
+            const select = document.getElementById('ordProductSelect');
+            select.value = prodId;
+            calculateOrderTotal();
+            document.getElementById('order-section').scrollIntoView({ behavior: 'smooth' });
+            showToast('পণ্যটি অর্ডার ফর্মে নির্বাচন করা হয়েছে!');
+        }
+
+        function calculateOrderTotal() {
+            const select = document.getElementById('ordProductSelect');
+            const qty = parseInt(document.getElementById('ordQuantity').value) || 1;
+            const selectedOption = select.options[select.selectedIndex];
+            const price = selectedOption ? parseFloat(selectedOption.dataset.price) : 0;
+            const total = price * qty;
+            document.getElementById('ordCalculatedTotal').textContent = total.toLocaleString();
+        }
+
+        // Customer Order Form Submission
+        document.getElementById('customerOrderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const select = document.getElementById('ordProductSelect');
+            const selectedProd = appState.products.find(p => p.id === select.value);
+            const qty = parseInt(document.getElementById('ordQuantity').value) || 1;
+            const total = (selectedProd ? selectedProd.price : 0) * qty;
+
+            const orderId = 'MF-' + Math.floor(100000 + Math.random() * 900000);
+            const today = new Date().toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            const newOrder = {
+                id: orderId,
+                date: today,
+                institution: document.getElementById('ordInstitution').value.trim(),
+                contactPerson: document.getElementById('ordContactPerson').value.trim(),
+                phone: document.getElementById('ordPhone').value.trim(),
+                productName: selectedProd ? `${selectedProd.name} (${selectedProd.size})` : 'Medical Dry Film',
+                quantity: qty,
+                totalAmount: total,
+                paymentMethod: document.getElementById('ordPaymentMethod').value,
+                trxId: document.getElementById('ordTrxId').value.trim() || 'N/A',
+                address: document.getElementById('ordAddress').value.trim(),
+                status: 'Pending'
+            };
+
+            appState.orders.unshift(newOrder);
+            saveState();
+
+            // Show confirmation box
+            document.getElementById('confirmedOrderId').textContent = orderId;
+            const cleanWa = appState.settings.whatsapp.replace(/[^0-9]/g, '');
+            const waMsg = `*নতুন অর্ডার ও পেমেন্ট তথ্য - ${appState.settings.brandName}*\n` +
+                          `অর্ডার আইডি: ${orderId}\n` +
+                          `প্রতিষ্ঠান: ${newOrder.institution}\n` +
+                          `পণ্য: ${newOrder.productName}\n` +
+                          `পরিমাণ: ${newOrder.quantity} বক্স\n` +
+                          `মোট বিল: ৳${newOrder.totalAmount}\n` +
+                          `পেমেন্ট মাধ্যম: ${newOrder.paymentMethod}\n` +
+                          `TrxID: ${newOrder.trxId}\n` +
+                          `মোবাইল: ${newOrder.phone}`;
+
+            document.getElementById('sendOrderWhatsappBtn').href = `https://wa.me/${cleanWa}?text=${encodeURIComponent(waMsg)}`;
+            document.getElementById('orderConfirmationBox').classList.remove('hidden');
+            showToast('আপনার অর্ডার সফলভাবে জমা হয়েছে!');
+        });
+
+        function resetOrderForm() {
+            document.getElementById('customerOrderForm').reset();
+            document.getElementById('orderConfirmationBox').classList.add('hidden');
+            calculateOrderTotal();
+        }
+
+        // =====================================================================
+        // PRODUCT IMAGE UPLOAD (COMPRESSED BASE64) & PREVIEW HELPERS
+        // =====================================================================
+        function handleProductImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // Compress image via Canvas so localStorage remains fast & clean
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 600;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height && width > maxDim) {
+                        height *= maxDim / width;
+                        width = maxDim;
+                    } else if (height > maxDim) {
+                        width *= maxDim / height;
+                        height = maxDim;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    currentUploadedImageBase64 = canvas.toDataURL('image/jpeg', 0.75);
+                    document.getElementById('prodImageUrl').value = '';
+                    updateImagePreviewBox(currentUploadedImageBase64);
+                    showToast('ছবি সফলভাবে প্রসেস ও প্রিভিউ করা হয়েছে!');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function previewImageFromUrl(url) {
+            currentUploadedImageBase64 = url.trim();
+            updateImagePreviewBox(currentUploadedImageBase64);
+        }
+
+        function updateImagePreviewBox(src) {
+            const box = document.getElementById('prodImagePreviewBox');
+            if (src) {
+                box.innerHTML = `<img src="${src}" class="w-full h-full object-cover" alt="Preview">`;
+            } else {
+                box.innerHTML = `<i class="fa-solid fa-image text-slate-300 text-xl"></i>`;
+            }
+        }
+
+        function clearProductImage() {
+            currentUploadedImageBase64 = '';
+            document.getElementById('prodImageFile').value = '';
+            document.getElementById('prodImageUrl').value = '';
+            updateImagePreviewBox('');
+        }
+
+        // =====================================================================
+        // ADMIN SECURITY GATE & PANEL CONTROLS (WITH 3-ATTEMPT LOCKOUT)
+        // =====================================================================
+        function openAdminGate() {
+            document.getElementById('securityCodeInput').value = '';
+            document.getElementById('securityErrorMsg').classList.add('hidden');
+            document.getElementById('adminGateModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('securityCodeInput').focus(), 100);
+        }
+
+        function closeAdminGate() {
+            document.getElementById('adminGateModal').classList.add('hidden');
+        }
+
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const now = Date.now();
+            const errorEl = document.getElementById('securityErrorMsg');
+            const errorText = document.getElementById('securityErrorText');
+
+            if (now < lockoutUntil) {
+                const secsLeft = Math.ceil((lockoutUntil - now) / 1000);
+                errorText.textContent = `অতিরিক্ত ভুল চেষ্টার কারণে লক করা হয়েছে। ${secsLeft} সেকেন্ড পর চেষ্টা করুন।`;
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            const entered = document.getElementById('securityCodeInput').value.trim();
+            if (entered === appState.securityCode) {
+                failedAttempts = 0;
+                closeAdminGate();
+                openAdminDashboard();
+                showToast('সিকিউরিটি যাচাই সফল! অ্যাডমিন প্যানেলে স্বাগতম।');
+            } else {
+                failedAttempts++;
+                const box = document.getElementById('adminGateBox');
+                if (failedAttempts >= 3) {
+                    lockoutUntil = Date.now() + 30000; // 30s cooldown
+                    failedAttempts = 0;
+                    errorText.textContent = '৩ বার ভুল কোড দেওয়ায় ৩০ সেকেন্ডের জন্য লক করা হয়েছে!';
+                } else {
+                    errorText.textContent = `ভুল সিকিউরিটি কোড! (${3 - failedAttempts} বার চেষ্টা বাকি আছে)`;
+                }
+                errorEl.classList.remove('hidden');
+                box.classList.remove('animate-shake');
+                void box.offsetWidth;
+                box.classList.add('animate-shake');
+            }
+        });
+
+        function openAdminDashboard() {
+            renderAdminPanels();
+            document.getElementById('adminDashboardModal').classList.remove('hidden');
+        }
+
+        function closeAdminDashboard() {
+            document.getElementById('adminDashboardModal').classList.add('hidden');
+        }
+
+        function switchAdminTab(tabName) {
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tabName) {
+                    btn.className = 'admin-tab-btn active px-4 py-2.5 rounded-xl text-sm font-semibold bg-teal-600 text-white transition flex items-center gap-2';
+                } else {
+                    btn.className = 'admin-tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 transition flex items-center gap-2';
+                }
+            });
+        }
+
+        function renderAdminPanels() {
+            // Populate General Settings Form
+            const s = appState.settings;
+            document.getElementById('admBrandName').value = s.brandName;
+            document.getElementById('admTagline').value = s.tagline;
+            document.getElementById('admCopyright').value = s.copyright;
+            document.getElementById('admPhone').value = s.phone;
+            document.getElementById('admWhatsapp').value = s.whatsapp;
+            document.getElementById('admEmail').value = s.email;
+            document.getElementById('admAddress').value = s.address;
+            document.getElementById('admShowTopNotice').checked = s.showTopNotice;
+            document.getElementById('admTopNotice').value = s.topNotice;
+            document.getElementById('admShowPublicPayments').checked = s.showPublicPayments;
+
+            // Populate Private Client Notice Form
+            document.getElementById('admClientName').value = s.clientName;
+            document.getElementById('admClientDueAmount').value = s.clientDueAmount || 0;
+            document.getElementById('admClientPhone').value = s.clientPhone || '';
+            document.getElementById('admClientTitle').value = s.clientTitle;
+            document.getElementById('admClientMessage').value = s.clientMessage;
+
+            // Populate Admin Products Table with Thumbnail
+            const prodTbody = document.getElementById('adminProductsTableBody');
+            prodTbody.innerHTML = appState.products.map(p => `
+                <tr class="hover:bg-slate-50">
+                    <td class="py-3 px-4">
+                        <div class="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center text-teal-600">
+                            ${p.image ? `<img src="${p.image}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-x-ray"></i>`}
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 font-semibold text-slate-900 font-inter">${p.name}</td>
+                    <td class="py-3 px-4 text-slate-600">${p.size}</td>
+                    <td class="py-3 px-4 font-bold font-inter text-teal-700">৳${p.price}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-semibold ${
+                            p.status === 'In Stock' ? 'bg-emerald-100 text-emerald-800' :
+                            p.status === 'Limited' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
+                        }">${p.status}</span>
+                    </td>
+                    <td class="py-3 px-4 text-right space-x-2">
+                        <button onclick="editAdminProduct('${p.id}')" class="text-teal-600 hover:text-teal-800 font-semibold text-xs bg-teal-50 px-2.5 py-1.5 rounded-lg">
+                            <i class="fa-solid fa-pen-to-square"></i> এডিট
+                        </button>
+                        <button onclick="deleteAdminProduct('${p.id}')" class="text-rose-600 hover:text-rose-800 font-semibold text-xs bg-rose-50 px-2.5 py-1.5 rounded-lg">
+                            <i class="fa-solid fa-trash"></i> ডিলিট
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Populate Admin Payment Accounts
+            const payList = document.getElementById('adminPaymentsList');
+            payList.innerHTML = appState.paymentAccounts.map(acc => `
+                <div class="border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3 bg-slate-50">
+                    <div>
+                        <p class="font-bold text-slate-900">${acc.provider} <span class="text-xs font-normal text-slate-500">(${acc.type})</span></p>
+                        <p class="font-inter font-bold text-teal-700 text-base mt-0.5">${acc.number}</p>
+                        <p class="text-xs text-slate-500">${acc.note || ''}</p>
+                    </div>
+                    <button onclick="deletePaymentAccount('${acc.id}')" class="text-rose-600 hover:bg-rose-100 p-2 rounded-xl transition" title="মুছে ফেলুন">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            // Populate Admin Orders
+            document.getElementById('adminOrderCountBadge').textContent = appState.orders.length;
+            const ordersContainer = document.getElementById('adminOrdersContainer');
+            if (appState.orders.length === 0) {
+                ordersContainer.innerHTML = `<p class="text-center text-slate-500 py-8">এখনো কোনো অর্ডার জমা পড়েনি।</p>`;
+            } else {
+                ordersContainer.innerHTML = appState.orders.map(ord => `
+                    <div class="border border-slate-200 rounded-2xl p-5 bg-slate-50/70 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="font-inter font-bold text-xs bg-slate-900 text-white px-2.5 py-1 rounded-lg">${ord.id}</span>
+                                <span class="text-xs text-slate-500">${ord.date}</span>
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                                    ord.status === 'Payment Verified' ? 'bg-emerald-100 text-emerald-800' :
+                                    ord.status === 'Delivered' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'
+                                }">${ord.status}</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base">${ord.institution} <span class="text-sm font-normal text-slate-600">(${ord.contactPerson} - ${ord.phone})</span></h4>
+                            <p class="text-sm text-teal-800 font-semibold">${ord.productName} × ${ord.quantity} বক্স = <span class="font-inter font-bold">৳${Number(ord.totalAmount).toLocaleString()}</span></p>
+                            <p class="text-xs text-slate-600">পেমেন্ট: <strong>${ord.paymentMethod}</strong> | TrxID: <strong class="font-inter text-slate-900">${ord.trxId}</strong> | ঠিকানা: ${ord.address}</p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2 shrink-0">
+                            <select onchange="updateOrderStatus('${ord.id}', this.value)" class="px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold bg-white">
+                                <option value="Pending" ${ord.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Confirmed" ${ord.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                <option value="Payment Verified" ${ord.status === 'Payment Verified' ? 'selected' : ''}>Payment Verified</option>
+                                <option value="Shipped" ${ord.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                <option value="Delivered" ${ord.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                            </select>
+                            <button onclick="openInvoicePreview('${ord.id}')" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-file-invoice"></i> ইনভয়েস
+                            </button>
+                            <button onclick="deleteOrder('${ord.id}')" class="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 px-3 py-2 rounded-xl text-xs font-semibold transition">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Save General Site Settings
+        document.getElementById('adminGeneralForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            appState.settings.brandName = document.getElementById('admBrandName').value.trim();
+            appState.settings.tagline = document.getElementById('admTagline').value.trim();
+            appState.settings.copyright = document.getElementById('admCopyright').value.trim();
+            appState.settings.phone = document.getElementById('admPhone').value.trim();
+            appState.settings.whatsapp = document.getElementById('admWhatsapp').value.trim();
+            appState.settings.email = document.getElementById('admEmail').value.trim();
+            appState.settings.address = document.getElementById('admAddress').value.trim();
+            appState.settings.showTopNotice = document.getElementById('admShowTopNotice').checked;
+            appState.settings.topNotice = document.getElementById('admTopNotice').value.trim();
+
+            saveState();
+            showToast('ওয়েবসাইটের সব সেটিংস সফলভাবে আপডেট হয়েছে!');
+        });
+
+        // Save Private Client Notice (Admin Only)
+        document.getElementById('adminPrivateClientForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            appState.settings.clientName = document.getElementById('admClientName').value.trim();
+            appState.settings.clientDueAmount = parseFloat(document.getElementById('admClientDueAmount').value) || 0;
+            appState.settings.clientPhone = document.getElementById('admClientPhone').value.trim();
+            appState.settings.clientTitle = document.getElementById('admClientTitle').value.trim();
+            appState.settings.clientMessage = document.getElementById('admClientMessage').value.trim();
+            saveState();
+            showToast('প্রাইভেট ক্লায়েন্ট ইনভয়েস ও নোটিশ সেভ হয়েছে!');
+        });
+
+        function previewPrivateClientInvoice() {
+            const s = appState.settings;
+            const today = new Date().toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('invBrandName').textContent = s.brandName;
+            document.getElementById('invPhone').textContent = 'Hotline: ' + s.phone;
+            document.getElementById('invOrderId').textContent = 'DUE-NOTICE-' + new Date().getFullYear();
+            document.getElementById('invDate').textContent = today;
+            document.getElementById('invInstitution').textContent = document.getElementById('admClientName').value;
+            document.getElementById('invContact').textContent = document.getElementById('admClientTitle').value;
+            document.getElementById('invClientPhone').textContent = document.getElementById('admClientPhone').value;
+            document.getElementById('invAddress').textContent = document.getElementById('admClientMessage').value;
+            document.getElementById('invPayMethod').textContent = 'Bank / bKash / Nagad';
+            document.getElementById('invTrxId').textContent = 'Pending Payment';
+            document.getElementById('invStatus').textContent = 'DUE INVOICE';
+            document.getElementById('invProduct').textContent = 'Medical Dry Film Pre-Order / Invoice Balance';
+            document.getElementById('invQty').textContent = 'Batch';
+            document.getElementById('invTotal').textContent = '৳ ' + Number(document.getElementById('admClientDueAmount').value || 0).toLocaleString();
+
+            document.getElementById('invoiceModal').classList.remove('hidden');
+        }
+
+        function sendPrivateNoticeWhatsapp() {
+            const name = document.getElementById('admClientName').value.trim();
+            const due = document.getElementById('admClientDueAmount').value;
+            const msg = document.getElementById('admClientMessage').value.trim();
+            const rawPhone = document.getElementById('admClientPhone').value.replace(/[^0-9]/g, '');
+            const text = `*${appState.settings.brandName} - জরুরি ইনভয়েস নোটিশ*\nসম্মানিত ${name},\nবকেয়া পরিমাণ: ৳${due}\n${msg}`;
+            const url = rawPhone ? `https://wa.me/${rawPhone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        }
+
+        function togglePublicPaymentsVisibility(isVisible) {
+            appState.settings.showPublicPayments = isVisible;
+            saveState();
+            showToast(isVisible ? 'পেমেন্ট মাধ্যম এখন ভিজিটরদের দেখানো হচ্ছে।' : 'পেমেন্ট মাধ্যম ভিজিটরদের থেকে লুকানো হয়েছে।');
+        }
+
+        // Add or Update Product (With Image)
+        document.getElementById('adminProductForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editProdId').value;
+            const name = document.getElementById('prodName').value.trim();
+            const size = document.getElementById('prodSize').value.trim();
+            const price = parseFloat(document.getElementById('prodPrice').value);
+            const status = document.getElementById('prodStatus').value;
+            const image = currentUploadedImageBase64;
+
+            if (editId) {
+                const idx = appState.products.findIndex(p => p.id === editId);
+                if (idx !== -1) {
+                    appState.products[idx] = { id: editId, name, size, price, status, image };
+                }
+                showToast('পণ্যের তথ্য ও ছবি আপডেট করা হয়েছে!');
+            } else {
+                appState.products.push({
+                    id: 'prod-' + Date.now(),
+                    name, size, price, status, image
+                });
+                showToast('নতুন পণ্য ক্যাটালগে যুক্ত হয়েছে!');
+            }
+
+            resetProductForm();
+            saveState();
+        });
+
+        function editAdminProduct(id) {
+            const prod = appState.products.find(p => p.id === id);
+            if (!prod) return;
+            document.getElementById('editProdId').value = prod.id;
+            document.getElementById('prodName').value = prod.name;
+            document.getElementById('prodSize').value = prod.size;
+            document.getElementById('prodPrice').value = prod.price;
+            document.getElementById('prodStatus').value = prod.status;
+            
+            currentUploadedImageBase64 = prod.image || '';
+            document.getElementById('prodImageUrl').value = (prod.image && prod.image.startsWith('http')) ? prod.image : '';
+            updateImagePreviewBox(currentUploadedImageBase64);
+
+            document.getElementById('prodSubmitBtn').textContent = 'আপডেট করুন';
+            document.getElementById('prodCancelEditBtn').classList.remove('hidden');
+        }
+
+        function resetProductForm() {
+            document.getElementById('adminProductForm').reset();
+            document.getElementById('editProdId').value = '';
+            clearProductImage();
+            document.getElementById('prodSubmitBtn').textContent = '+ পণ্য সেভ করুন';
+            document.getElementById('prodCancelEditBtn').classList.add('hidden');
+        }
+
+        function deleteAdminProduct(id) {
+            appState.products = appState.products.filter(p => p.id !== id);
+            saveState();
+            showToast('পণ্যটি তালিকা থেকে মুছে ফেলা হয়েছে।');
+        }
+
+        // JSON Backup Export & Import
+        function exportBackupJson() {
+            const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(appState, null, 2));
+            const a = document.createElement('a');
+            a.setAttribute('href', dataStr);
+            a.setAttribute('download', `medifilmbd-backup-${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            showToast('সম্পূর্ণ ডাটা ব্যাকআপ ডাউনলোড হয়েছে!');
+        }
+
+        function importBackupJson(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported && imported.settings && imported.products) {
+                        appState = imported;
+                        saveState();
+                        showToast('ব্যাকআপ ডাটা সফলভাবে রিস্টোর করা হয়েছে!');
+                    } else {
+                        showToast('সঠিক ব্যাকআপ ফাইল নির্বাচন করুন।', 'error');
+                    }
+                } catch (err) {
+                    showToast('ফাইল পড়তে সমস্যা হয়েছে!', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Payment Accounts Management
+        document.getElementById('adminPaymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            appState.paymentAccounts.push({
+                id: 'pay-' + Date.now(),
+                provider: document.getElementById('payProvider').value.trim(),
+                type: document.getElementById('payType').value.trim(),
+                number: document.getElementById('payNumber').value.trim(),
+                note: document.getElementById('payNote').value.trim()
+            });
+            this.reset();
+            saveState();
+            showToast('নতুন পেমেন্ট অ্যাকাউন্ট যুক্ত হয়েছে!');
+        });
+
+        function deletePaymentAccount(id) {
+            appState.paymentAccounts = appState.paymentAccounts.filter(a => a.id !== id);
+            saveState();
+            showToast('পেমেন্ট অ্যাকাউন্ট মুছে ফেলা হয়েছে।');
+        }
+
+        // Order Management
+        function updateOrderStatus(orderId, newStatus) {
+            const ord = appState.orders.find(o => o.id === orderId);
+            if (ord) {
+                ord.status = newStatus;
+                saveState();
+                showToast(`অর্ডার স্ট্যাটাস "${newStatus}" করা হয়েছে।`);
+            }
+        }
+
+        function deleteOrder(orderId) {
+            appState.orders = appState.orders.filter(o => o.id !== orderId);
+            saveState();
+            showToast('অর্ডার রেকর্ড মুছে ফেলা হয়েছে।');
+        }
+
+        function openInvoicePreview(orderId) {
+            const ord = appState.orders.find(o => o.id === orderId);
+            if (!ord) return;
+
+            document.getElementById('invBrandName').textContent = appState.settings.brandName;
+            document.getElementById('invPhone').textContent = 'Hotline: ' + appState.settings.phone;
+            document.getElementById('invOrderId').textContent = ord.id;
+            document.getElementById('invDate').textContent = ord.date;
+            document.getElementById('invInstitution').textContent = ord.institution;
+            document.getElementById('invContact').textContent = ord.contactPerson;
+            document.getElementById('invClientPhone').textContent = ord.phone;
+            document.getElementById('invAddress').textContent = ord.address;
+            document.getElementById('invPayMethod').textContent = ord.paymentMethod;
+            document.getElementById('invTrxId').textContent = ord.trxId;
+            document.getElementById('invStatus').textContent = ord.status;
+            document.getElementById('invProduct').textContent = ord.productName;
+            document.getElementById('invQty').textContent = ord.quantity + ' Box';
+            document.getElementById('invTotal').textContent = '৳ ' + Number(ord.totalAmount).toLocaleString();
+
+            document.getElementById('invoiceModal').classList.remove('hidden');
+        }
+
+        // Security Code Change
+        document.getElementById('adminSecurityForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const current = document.getElementById('currentSecCode').value.trim();
+            const next = document.getElementById('newSecCode').value.trim();
+            const confirm = document.getElementById('confirmSecCode').value.trim();
+
+            if (current !== appState.securityCode) {
+                showToast('বর্তমান সিকিউরিটি কোডটি সঠিক নয়!', 'error');
+                return;
+            }
+            if (next !== confirm) {
+                showToast('নতুন সিকিউরিটি কোড দুটি মেলেনি!', 'error');
+                return;
+            }
+
+            appState.securityCode = next;
+            saveState();
+            this.reset();
+            showToast('অ্যাডমিন সিকিউরিটি কোড সফলভাবে পরিবর্তন করা হয়েছে!');
+        });
+
+        function resetAllToDefault() {
+            appState = JSON.parse(JSON.stringify(defaultState));
+            saveState();
+            showToast('সবকিছু ডিফল্ট সেটিংসে রিসেট করা হয়েছে।');
+        }
+
+        // Initialize App
+        const FIREBASE_CONFIG_KEY = 'medifilmbd_firebase_config_v1';
+        let firebaseDb = null;
+        let isCloudConnected = false;
+        let isApplyingRemoteUpdate = false;
+
+        function updateCloudStatusUI(connected, message = '') {
+            isCloudConnected = connected;
+            const topBadge = document.getElementById('cloudStatusBadge');
+            const adminPill = document.getElementById('adminCloudStatusPill');
+            const tabBox = document.getElementById('cloudTabStatusBox');
+
+            if (connected) {
+                if (topBadge) {
+                    topBadge.className = 'inline-flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 px-2.5 py-0.5 rounded-lg text-[11px] font-inter font-medium';
+                    topBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Cloud Live</span>`;
+                }
+                if (adminPill) {
+                    adminPill.className = 'text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-xl font-inter font-medium';
+                    adminPill.textContent = '🟢 Cloud Live Synced';
+                }
+                if (tabBox) {
+                    tabBox.className = 'px-4 py-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold';
+                    tabBox.textContent = message || 'স্ট্যাটাস: 🟢 Firebase Cloud Live যুক্ত আছে';
+                }
+            } else {
+                if (topBadge) {
+                    topBadge.className = 'inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-300 px-2.5 py-0.5 rounded-lg text-[11px] font-inter font-medium';
+                    topBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>Local Mode</span>`;
+                }
+                if (adminPill) {
+                    adminPill.className = 'text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-xl font-inter font-medium';
+                    adminPill.textContent = '🟡 Local Mode';
+                }
+                if (tabBox) {
+                    tabBox.className = 'px-4 py-2.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold';
+                    tabBox.textContent = message || 'স্ট্যাটাস: 🟡 বর্তমানে লোকাল মোডে চলছে (Cloud সংযুক্ত নয়)';
+                }
+            }
+        }
+
+        function parseFirebaseConfigInput(rawText) {
+            const text = rawText.trim();
+            if (!text) return null;
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                // Extract object literal from `const firebaseConfig = { ... };`
+                const startIdx = text.indexOf('{');
+                const endIdx = text.lastIndexOf('}');
+                if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+                    const objStr = text.slice(startIdx, endIdx + 1);
+                    try {
+                        return Function('"use strict";return (' + objStr + ')')();
+                    } catch (err) {
+                        return null;
+                    }
+                }
+                return null;
+            }
+        }
+
+        function initFirebaseCloud(configObj, pushIfEmpty = false) {
+            if (!configObj || !configObj.databaseURL || !window.firebase) {
+                updateCloudStatusUI(false, 'স্ট্যাটাস: সঠিক databaseURL পাওয়া যায়নি');
+                return false;
+            }
+
+            try {
+                if (firebase.apps.length > 0) {
+                    firebase.app().delete().then(() => startFirebaseApp(configObj, pushIfEmpty));
+                } else {
+                    startFirebaseApp(configObj, pushIfEmpty);
+                }
+                return true;
+            } catch (err) {
+                console.error('Firebase init error:', err);
+                updateCloudStatusUI(false, 'স্ট্যাটাস: কানেকশন ত্রুটি হয়েছে');
+                return false;
+            }
+        }
+
+        function startFirebaseApp(configObj, pushIfEmpty) {
+            firebase.initializeApp(configObj);
+            firebaseDb = firebase.database();
+            const rootRef = firebaseDb.ref('medifilmbd_portal');
+
+            // Monitor connection state
+            firebaseDb.ref('.info/connected').on('value', (snap) => {
+                if (snap.val() === true) {
+                    updateCloudStatusUI(true);
+                }
+            });
+
+            // Real-time listener for all portal changes across all devices
+            rootRef.on('value', (snapshot) => {
+                const cloudData = snapshot.val();
+                if (cloudData && cloudData.settings) {
+                    isApplyingRemoteUpdate = true;
+                    appState = {
+                        ...defaultState,
+                        ...cloudData,
+                        settings: { ...defaultState.settings, ...(cloudData.settings || {}) },
+                        products: cloudData.products ? Object.values(cloudData.products) : [],
+                        paymentAccounts: cloudData.paymentAccounts ? Object.values(cloudData.paymentAccounts) : [],
+                        orders: cloudData.orders ? Object.values(cloudData.orders) : []
+                    };
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                    renderAll();
+                    isApplyingRemoteUpdate = false;
+                } else if (pushIfEmpty) {
+                    rootRef.set(appState);
+                }
+            }, (error) => {
+                console.error('Firebase read error:', error);
+                updateCloudStatusUI(false, 'স্ট্যাটাস: ডাটাবেজ পারমিশন (Rules) চেক করুন');
+            });
+        }
+
+        function pushLocalDataToFirebase() {
+            if (!firebaseDb) {
+                showToast('প্রথমে Firebase Config পেস্ট করে কানেক্ট করুন।', 'error');
+                return;
+            }
+            firebaseDb.ref('medifilmbd_portal').set(appState)
+                .then(() => showToast('বর্তমান সব ডাটা সফলভাবে Firebase ক্লাউডে আপলোড হয়েছে!'))
+                .catch(() => showToast('ক্লাউডে ডাটা পাঠাতে সমস্যা হয়েছে। Database Rules চেক করুন।', 'error'));
+        }
+
+        function disconnectFirebaseCloud() {
+            localStorage.removeItem(FIREBASE_CONFIG_KEY);
+            document.getElementById('firebaseConfigInput').value = '';
+            if (firebaseDb) {
+                firebaseDb.ref('medifilmbd_portal').off();
+                firebaseDb = null;
+            }
+            updateCloudStatusUI(false);
+            showToast('Firebase Cloud সংযোগ বিচ্ছিন্ন করা হয়েছে।');
+        }
+
+        document.getElementById('firebaseConfigForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const raw = document.getElementById('firebaseConfigInput').value;
+            const parsed = parseFirebaseConfigInput(raw);
+            if (!parsed || !parsed.databaseURL) {
+                showToast('সঠিক Firebase Config দিন যাতে databaseURL উল্লেখ আছে!', 'error');
+                return;
+            }
+            localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(parsed));
+            initFirebaseCloud(parsed, true);
+            showToast('Firebase Cloud-এর সাথে সংযুক্ত হচ্ছে...');
+        });
+
+        // Override saveState to sync with both LocalStorage and Firebase Realtime Database
+        const originalSaveState = saveState;
+        saveState = function() {
+            originalSaveState();
+            if (firebaseDb && !isApplyingRemoteUpdate) {
+                firebaseDb.ref('medifilmbd_portal').set(appState).catch(err => {
+                    console.error('Cloud sync write failed:', err);
+                });
+            }
+        };
+
+        // Load saved Firebase config on startup if present
+        (function autoConnectSavedFirebase() {
+            const savedConfigRaw = localStorage.getItem(FIREBASE_CONFIG_KEY);
+            if (savedConfigRaw) {
+                try {
+                    const savedConfig = JSON.parse(savedConfigRaw);
+                    const inputEl = document.getElementById('firebaseConfigInput');
+                    if (inputEl) inputEl.value = JSON.stringify(savedConfig, null, 2);
+                    initFirebaseCloud(savedConfig, false);
+                } catch (e) {
+                    console.error('Invalid saved Firebase config');
+                }
+            }
+        })();
+
+        renderAll();
+    </script>
+</body>
+</html>
