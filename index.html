@@ -3,24 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediFilm BD | প্রিমিয়াম মেডিকেল ড্রাই ফিল্ম ও ডায়াগনস্টিক পোর্টাল</title>
+    <title>MediFilm BD | প্রিমিয়াম মেডিকেল ফ্লিম ডায়াগনস্টিক রিয়েজেন্ট ডিভাইস ক্লিনিক সেটাপ - হাসপাতালে ব্যাবহারের সার্জিক্যাল প্রডাক্ট ও যন্ত্রপাতি সরবরাহ করা হয়</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-  <!-- ভাষা পরিবর্তনের বাটন বা উইজারদের জন্য div -->
-<div id="google_translate_element" style="position: fixed; top: 15px; right: 20px; z-index: 9999;"></div>
-
-<!-- Google Translate Script -->
-<script type="text/javascript">
-function googleTranslateElementInit() {
-  new google.translate.TranslateElement({
-    pageLanguage: 'bn', 
-    includedLanguages: 'bn,en', 
-    layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-  }, 'google_translate_element');
-}
-</script>
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>  
+    
     <!-- Google Fonts: Hind Siliguri & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,7 +48,7 @@ function googleTranslateElementInit() {
             background-color: #f8fafc;
         }
         .glass-nav {
-            background: rgba(255, 255, 255, 0.88);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(16px);
             border-bottom: 1px solid rgba(226, 232, 240, 0.8);
         }
@@ -70,27 +57,22 @@ function googleTranslateElementInit() {
             backdrop-filter: blur(12px);
             border: 1px solid rgba(226, 232, 240, 0.9);
         }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
+        /* Google Translate Widget Custom Styling for Compact Look */
+        .goog-te-gadget { font-size: 0px !important; }
+        .goog-te-gadget span { display: none; }
+        .goog-te-gadget select {
+            background-color: #0f172a;
+            color: #2dd4bf;
+            border: 1px solid #14b8a6;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
         }
-        .animate-shake {
-            animation: shake 0.35s ease-in-out;
-        }
-        @media print {
-            body * { visibility: hidden; }
-            #printableInvoiceArea, #printableInvoiceArea * { visibility: visible; }
-            #printableInvoiceArea {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                background: white;
-                padding: 20px;
-            }
-            .no-print { display: none !important; }
-        }
+        .goog-logo-link, .goog-te-banner-frame { display: none !important; }
+        body { top: 0px !important; }
     </style>
 </head>
 <body class="text-slate-800 antialiased selection:bg-teal-600 selection:text-white">
@@ -112,15 +94,17 @@ function googleTranslateElementInit() {
                 </span>
             </div>
 
-            <div class="flex items-center gap-4 text-xs">
-                <a id="topPhoneLink" href="#" class="hover:text-white flex items-center gap-1.5 transition">
+            <div class="flex items-center gap-3 text-xs">
+                <a id="topPhoneLink" href="#" class="hover:text-white hidden sm:flex items-center gap-1.5 transition">
                     <i class="fa-solid fa-phone-volume text-teal-400"></i>
                     <span id="displayTopPhone" class="font-inter font-medium"></span>
                 </a>
-                <span class="text-slate-700">|</span>
+                <span class="text-slate-700 hidden sm:inline">|</span>
+                <!-- Compact Professional Google Translate Element -->
+                <div id="google_translate_element" class="inline-block"></div>
                 <button onclick="openAdminGate()" class="bg-teal-600/20 hover:bg-teal-600/30 text-teal-300 border border-teal-500/30 px-3 py-1 rounded-lg flex items-center gap-1.5 transition font-semibold">
                     <i class="fa-solid fa-lock text-[11px]"></i>
-                    <span>অ্যাডমিন পোর্টাল</span>
+                    <span>অ্যাডমিন</span>
                 </button>
             </div>
         </div>
@@ -142,17 +126,17 @@ function googleTranslateElementInit() {
     <!-- Sticky Navbar -->
     <header class="sticky top-0 z-40 glass-nav">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <a href="#" class="flex items-center gap-3.5 group">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-600 to-slate-900 flex items-center justify-center text-white shadow-lg shadow-teal-600/20 group-hover:scale-105 transition">
+            <a href="#" class="flex items-center gap-3.5 group max-w-[240px] sm:max-w-md">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-600 to-slate-900 flex items-center justify-center text-white shadow-lg shadow-teal-600/20 group-hover:scale-105 transition shrink-0">
                     <i class="fa-solid fa-x-ray text-xl"></i>
                 </div>
                 <div>
-                    <h1 id="displayBrandName" class="text-2xl font-extrabold text-slate-900 tracking-tight leading-none font-inter">MediFilm BD</h1>
-                    <p id="displayTagline" class="text-xs text-teal-700 font-semibold mt-1">মেডিকেল ড্রাই ফিল্ম ও ডায়াগনস্টিক সাপ্লায়ার</p>
+                    <h1 id="displayBrandName" class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight leading-none font-inter truncate">MediFilm BD</h1>
+                    <p id="displayTagline" class="text-[10px] sm:text-xs text-teal-700 font-semibold mt-1 leading-tight line-clamp-1">প্রিমিয়াম মেডিকেল ফ্লিম ডায়াগনস্টিক রিয়েজেন্ট ডিভাইস ক্লিনিক সেটাপ - হাসপাতালে ব্যাবহারের সার্জিক্যাল প্রডাক্ট ও যন্ত্রপাতি সরবরাহ করা হয়</p>
                 </div>
             </a>
 
-            <nav class="hidden md:flex items-center gap-8 font-semibold text-slate-700 text-sm">
+            <nav class="hidden md:flex items-center gap-6 font-semibold text-slate-700 text-sm">
                 <a href="#products" class="hover:text-teal-600 transition">পণ্য ও স্টক</a>
                 <a href="#order-section" class="hover:text-teal-600 transition">অনলাইন অর্ডার</a>
                 <a id="navPaymentLink" href="#payment-accounts" class="hover:text-teal-600 transition">পেমেন্ট মাধ্যম</a>
@@ -160,7 +144,7 @@ function googleTranslateElementInit() {
             </nav>
 
             <div class="flex items-center gap-3">
-                <a href="#order-section" class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-3 rounded-2xl text-sm font-bold shadow-lg shadow-teal-600/20 transition flex items-center gap-2">
+                <a href="#order-section" class="bg-teal-600 hover:bg-teal-700 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold shadow-lg shadow-teal-600/20 transition flex items-center gap-2">
                     <i class="fa-solid fa-cart-shopping"></i>
                     <span>প্রি-অর্ডার</span>
                 </a>
@@ -176,15 +160,15 @@ function googleTranslateElementInit() {
             <div class="lg:col-span-7 space-y-7">
                 <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-teal-500/15 border border-teal-400/30 text-teal-300 text-xs sm:text-sm font-semibold">
                     <i class="fa-solid fa-award text-teal-400"></i>
-                    <span>হাসপাতাল ও ডায়াগনস্টিক সেন্টারের বিশ্বস্ত বিটুবি পার্টনার</span>
+                    <span>হাসপাতাল, ক্লিনিক ও ডায়াগনস্টিক সেন্টারের বিশ্বস্ত পার্টনার</span>
                 </div>
                 
                 <h2 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
-                    অরিজিনাল <span class="text-teal-400">Fujifilm DI-HL</span> মেডিকেল ড্রাই ফিল্ম পাইকারি মূল্যে
+                    মেডিকেল ফ্লিম, রিয়েজেন্ট ও <span class="text-teal-400">সার্জিক্যাল যন্ত্রপাতি</span> পাইকারি মূল্যে
                 </h2>
                 
                 <p class="text-slate-300 text-base sm:text-lg max-w-2xl leading-relaxed">
-                    সারা দেশে কুরিয়ার ডেলিভারি, নিখুঁত ইমেজিং কোয়ালিটি এবং অফিশিয়াল ভ্যাট চালানসহ আপনার প্রতিষ্ঠানের নিয়মিত সাপ্লাই নিশ্চিত করুন।
+                    সম্পূর্ণ ক্লিনিক সেটাপ, ডায়াগনস্টিক রিয়েজেন্ট, এবং হাসপাতালে ব্যবহারের সব ধরনের সার্জিক্যাল প্রোডাক্ট ও যন্ত্রপাতি সারা দেশে ২৪ ঘণ্টায় ডেলিভারি।
                 </p>
 
                 <div class="flex flex-wrap items-center gap-4 pt-3">
@@ -201,11 +185,11 @@ function googleTranslateElementInit() {
                 <div class="grid grid-cols-3 gap-6 pt-8 border-t border-slate-800 max-w-lg">
                     <div>
                         <p class="text-2xl sm:text-3xl font-extrabold text-white font-inter">১০০%</p>
-                        <p class="text-xs text-slate-400 mt-0.5">অরিজিনাল ইম্পোর্টেড</p>
+                        <p class="text-xs text-slate-400 mt-0.5">অরিজিনাল কোয়ালিটি</p>
                     </div>
                     <div>
-                        <p class="text-2xl sm:text-3xl font-extrabold text-teal-400 font-inter">২৪ ঘণ্টা</p>
-                        <p class="text-xs text-slate-400 mt-0.5">দ্রুত কুরিয়ার সার্ভিস</p>
+                        <p class="text-2xl sm:text-3xl font-extrabold text-teal-400 font-inter">সম্পূর্ণ</p>
+                        <p class="text-xs text-slate-400 mt-0.5">ক্লিনিক সেটাপ সলিউশন</p>
                     </div>
                     <div>
                         <p class="text-2xl sm:text-3xl font-extrabold text-white font-inter">B2B</p>
@@ -224,8 +208,8 @@ function googleTranslateElementInit() {
                             <i class="fa-solid fa-file-shield"></i>
                         </div>
                         <div>
-                            <span class="text-xs font-bold uppercase tracking-wider text-teal-300">কর্পোরেট প্রি-অর্ডার</span>
-                            <h3 class="text-xl font-bold text-white">সহজ ৩ ধাপ প্রক্রিয়া</h3>
+                            <span class="text-xs font-bold uppercase tracking-wider text-teal-300">হাসপাতাল ও ক্লিনিক সাপ্লাই</span>
+                            <h3 class="text-xl font-bold text-white">সহজ অর্ডার প্রক্রিয়া</h3>
                         </div>
                     </div>
 
@@ -233,24 +217,24 @@ function googleTranslateElementInit() {
                         <div class="flex items-start gap-4 bg-slate-900/70 border border-slate-700/80 p-4 rounded-2xl">
                             <span class="w-8 h-8 rounded-xl bg-teal-500 text-slate-950 font-bold flex items-center justify-center shrink-0 font-inter">1</span>
                             <div>
-                                <p class="font-bold text-white">পণ্য ও সাইজ চয়ন</p>
-                                <p class="text-slate-300 text-xs mt-0.5">প্রয়োজনীয় ড্রাই ফিল্ম সাইজ ও বক্সের পরিমাণ নির্বাচন করুন।</p>
+                                <p class="font-bold text-white">পণ্য ও যন্ত্রপাতি নির্বাচন</p>
+                                <p class="text-slate-300 text-xs mt-0.5">ড্রাই ফিল্ম, রিয়েজেন্ট বা সার্জিক্যাল আইটেম সিলেক্ট করুন।</p>
                             </div>
                         </div>
 
                         <div class="flex items-start gap-4 bg-slate-900/70 border border-slate-700/80 p-4 rounded-2xl">
                             <span class="w-8 h-8 rounded-xl bg-teal-500 text-slate-950 font-bold flex items-center justify-center shrink-0 font-inter">2</span>
                             <div>
-                                <p class="font-bold text-white">অর্ডার ফরম পূরণ</p>
-                                <p class="text-slate-300 text-xs mt-0.5">প্রতিষ্ঠানের নাম ও ডেলিভারি ঠিকানা দিয়ে সাবমিট করুন।</p>
+                                <p class="font-bold text-white">তথ্য পূরণ করুন</p>
+                                <p class="text-slate-300 text-xs mt-0.5">প্রতিষ্ঠানের নাম ও ঠিকানা দিয়ে প্রি-অর্ডার সাবমিট করুন।</p>
                             </div>
                         </div>
 
                         <div class="flex items-start gap-4 bg-slate-900/70 border border-slate-700/80 p-4 rounded-2xl">
                             <span class="w-8 h-8 rounded-xl bg-teal-500 text-slate-950 font-bold flex items-center justify-center shrink-0 font-inter">3</span>
                             <div>
-                                <p class="font-bold text-white">ডেলিভারি ও ইনভয়েস</p>
-                                <p class="text-slate-300 text-xs mt-0.5">আমাদের প্রতিনিধি যোগাযোগ করে সরাসরি অফিসে কুরিয়ার নিশ্চিত করবেন।</p>
+                                <p class="font-bold text-white">নিরাপদ ডেলিভারি</p>
+                                <p class="text-slate-300 text-xs mt-0.5">আমাদের প্রতিনিধি যোগাযোগ করে সরাসরি অফিসে বা হাসপাতালে পৌঁছে দেবেন।</p>
                             </div>
                         </div>
                     </div>
@@ -277,8 +261,8 @@ function googleTranslateElementInit() {
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
                 <div>
                     <span class="text-teal-600 font-bold text-xs uppercase tracking-wider bg-teal-50 px-3 py-1.5 rounded-lg border border-teal-200">লাইভ ইনভেন্টরি</span>
-                    <h2 class="text-3xl font-extrabold text-slate-900 mt-2">মেডিকেল ড্রাই ফিল্ম ক্যাটালগ</h2>
-                    <p class="text-slate-600 text-base mt-1">আপনার প্রয়োজনীয় সাইজ সিলেক্ট করে সরাসরি প্রি-অর্ডার করুন।</p>
+                    <h2 class="text-3xl font-extrabold text-slate-900 mt-2">মেডিকেল পণ্য ও যন্ত্রপাতি ক্যাটালগ</h2>
+                    <p class="text-slate-600 text-base mt-1">প্রয়োজনীয় মেডিকেল ফ্লিম, রিয়েজেন্ট ও সার্জিক্যাল আইটেম বেছে নিন।</p>
                 </div>
                 
                 <div class="flex flex-wrap gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
@@ -331,8 +315,8 @@ function googleTranslateElementInit() {
                     <form id="customerOrderForm" class="space-y-6">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">প্রতিষ্ঠান / ডায়াগনস্টিক নাম *</label>
-                                <input type="text" id="ordInstitution" required placeholder="যেমন: পপুলার ডায়াগনস্টিক" class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10 outline-none text-sm transition">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">প্রতিষ্ঠান / হাসপাতাল / ক্লিনিক নাম *</label>
+                                <input type="text" id="ordInstitution" required placeholder="যেমন: পপুলার হসপিটাল" class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10 outline-none text-sm transition">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">যোগাযোগকারীর নাম *</label>
@@ -355,7 +339,7 @@ function googleTranslateElementInit() {
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                             <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">পরিমাণ (বক্স) *</label>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">পরিমাণ (বক্স/পিস) *</label>
                                 <input type="number" id="ordQuantity" min="1" value="1" oninput="calculateOrderTotal()" required class="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10 outline-none text-sm font-inter font-bold transition">
                             </div>
                             <div>
@@ -423,7 +407,7 @@ function googleTranslateElementInit() {
                             কর্পোরেট সাপোর্ট ও অফিস
                         </h3>
                         <p class="text-slate-300 text-sm leading-relaxed mb-6">
-                            বাল্ক অর্ডার, হাসপাতাল টেন্ডার বা যেকোনো জরুরি তথ্যের জন্য সরাসরি আমাদের টিমকে কল করুন।
+                            হাসপাতাল প্রজেক্ট, ক্লিনিক সেটাপ বা যেকোনো জরুরি তথ্যের জন্য সরাসরি আমাদের টিমকে কল করুন।
                         </p>
                         <div class="space-y-3.5">
                             <a id="cardPhoneLink" href="#" class="flex items-center gap-4 bg-white/5 hover:bg-white/10 p-4 rounded-2xl border border-white/10 transition">
@@ -471,7 +455,7 @@ function googleTranslateElementInit() {
                 </div>
                 <div>
                     <p id="footerBrandName" class="text-white font-extrabold font-inter text-lg">MediFilm BD</p>
-                    <p id="footerCopyrightText" class="text-xs text-slate-400 mt-0.5">স্বত্ব © ২০২৬ সর্বস্বত্ব সংরক্ষিত | মেডিকেল ইমেজিং সলিউশন</p>
+                    <p id="footerCopyrightText" class="text-xs text-slate-400 mt-0.5">স্বত্ব © ২০২৬ সর্বস্বত্ব সংরক্ষিত | মেডিকেল ইমেজিং ও সার্জিক্যাল সলিউশন</p>
                 </div>
             </div>
 
@@ -599,8 +583,8 @@ function googleTranslateElementInit() {
                                 <input type="text" id="prodName" required placeholder="Fujifilm DI-HL Dry Film" class="w-full px-4 py-3 rounded-xl border-2 border-slate-300 text-sm bg-white font-semibold">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-2">সাইজ ও প্যাক বিবরণ *</label>
-                                <input type="text" id="prodSize" required placeholder="10×12 Inch (150 Sheets)" class="w-full px-4 py-3 rounded-xl border-2 border-slate-300 text-sm bg-white font-semibold">
+                                <label class="block text-xs font-bold text-slate-700 mb-2">সাইজ বা বিবরণ *</label>
+                                <input type="text" id="prodSize" required placeholder="10×12 Inch বা সার্জিক্যাল পিস" class="w-full px-4 py-3 rounded-xl border-2 border-slate-300 text-sm bg-white font-semibold">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-2">মূল্য (৳) *</label>
@@ -657,7 +641,7 @@ function googleTranslateElementInit() {
                                 <tr class="border-b border-slate-200 text-xs font-extrabold uppercase text-slate-600 bg-slate-100">
                                     <th class="py-4 px-5">ছবি</th>
                                     <th class="py-4 px-5">পণ্যের নাম</th>
-                                    <th class="py-4 px-5">সাইজ ও প্যাক</th>
+                                    <th class="py-4 px-5">সাইজ ও বিবরণ</th>
                                     <th class="py-4 px-5">মূল্য (৳)</th>
                                     <th class="py-4 px-5">স্টক স্ট্যাটাস</th>
                                     <th class="py-4 px-5 text-right">অ্যাকশন</th>
@@ -673,7 +657,7 @@ function googleTranslateElementInit() {
                 <!-- TAB 2: ORDERS -->
                 <div id="tab-orders" class="admin-tab-content hidden bg-white rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-200">
                     <div class="border-b border-slate-100 pb-4">
-                        <h3 class="text-2xl font-extrabold text-slate-900">গ্রাহক ও হাসপাতালের অর্ডার তালিকা</h3>
+                        <h3 class="text-2xl font-extrabold text-slate-900">হাসপাতাল ও গ্রাহকদের অর্ডার তালিকা</h3>
                         <p class="text-xs text-slate-500 mt-1">সরাসরি Supabase ক্লাউড ডাটাবেজ থেকে অর্ডারগুলো এখানে দেখানো হচ্ছে।</p>
                     </div>
 
@@ -734,7 +718,7 @@ function googleTranslateElementInit() {
                                     <input type="text" id="admBrandName" required class="w-full px-4 py-3 rounded-xl border-2 border-slate-300 text-sm font-inter font-bold">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-2">ট্যাগলাইন</label>
+                                    <label class="block text-xs font-bold text-slate-700 mb-2">ট্যাগলাইন (শিরোনাম)</label>
                                     <input type="text" id="admTagline" required class="w-full px-4 py-3 rounded-xl border-2 border-slate-300 text-sm font-semibold">
                                 </div>
                                 <div>
@@ -827,7 +811,7 @@ function googleTranslateElementInit() {
                 <div class="flex justify-between items-start border-b-2 border-slate-100 pb-6">
                     <div>
                         <h2 id="invBrandName" class="text-3xl font-extrabold text-slate-900 font-inter">MediFilm BD</h2>
-                        <p class="text-xs text-slate-500 font-medium">মেডিকেল ড্রাই ফিল্ম ও ডায়াগনস্টিক ইমেজিং সাপ্লায়ার</p>
+                        <p class="text-xs text-slate-500 font-medium">প্রিমিয়াম মেডিকেল ফ্লিম ডায়াগনস্টিক রিয়েজেন্ট ডিভাইস ক্লিনিক সেটাপ ও সার্জিক্যাল সাপ্লাই</p>
                         <p id="invPhone" class="text-xs text-slate-600 font-inter mt-1.5 font-bold"></p>
                     </div>
                     <div class="text-right">
@@ -878,61 +862,73 @@ function googleTranslateElementInit() {
         </div>
     </div>
 
+    <!-- Google Translate Script -->
+    <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'bn', 
+        includedLanguages: 'bn,en', 
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
     <!-- ===================================================================== -->
     <!-- APPLICATION LOGIC & SUPABASE CLOUD SYNC -->
     <!-- ===================================================================== -->
     <script>
-        const SUPABASE_URL = 'https://ktlsftupidmflixwihd.supabase.co';
+        const SUPABASE_URL = 'https://ktlsftupidmflixwihdy.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_sntYjMM3lWiQHknuaEMKwg_bDoeD5EL';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const STORAGE_KEY = 'medifilmbd_portal_cache_v4';
+        const STORAGE_KEY = 'medifilmbd_portal_cache_v5';
 
         const defaultState = {
             securityCode: '2026',
             settings: {
                 brandName: 'MediFilm BD',
-                tagline: 'মেডিকেল ড্রাই ফিল্ম ও ডায়াগনস্টিক ইমেজিং সাপ্লায়ার',
-                copyright: 'স্বত্ব © ২০২৬ সর্বস্বত্ব সংরক্ষিত | মেডিকেল ইমেজিং সলিউশন',
+                tagline: 'প্রিমিয়াম মেডিকেল ফ্লিম ডায়াগনস্টিক রিয়েজেন্ট ডিভাইস ক্লিনিক সেটাপ - হাসপাতালে ব্যাবহারের সার্জিক্যাল প্রডাক্ট ও যন্ত্রপাতি সরবরাহ করা হয়',
+                copyright: 'স্বত্ব © ২০২৬ সর্বস্বত্ব সংরক্ষিত | মেডিকেল ইমেজিং ও সার্জিক্যাল সলিউশন',
                 phone: '+880 1711-000000',
                 whatsapp: '8801711000000',
                 email: 'sales@medifilmbd.com',
                 address: 'মতিঝিল বাণিজ্যিক এলাকা, ঢাকা-১০০০',
                 showTopNotice: true,
-                topNotice: 'বিজ্ঞপ্তি: Fujifilm DI-HL মেডিকেল ড্রাই ফিল্মের সকল সাইজের হোলসেল প্রি-অর্ডার চলছে। সারা দেশে ২৪ ঘণ্টায় কুরিয়ার ডেলিভারি।',
+                topNotice: 'বিজ্ঞপ্তি: মেডিকেল ফ্লিম, ডায়াগনস্টিক রিয়েজেন্ট ও সার্জিক্যাল যন্ত্রপাতির হোলসেল প্রি-অর্ডার চলছে। সারা দেশে ২৪ ঘণ্টায় ডেলিভারি।',
                 showPublicPayments: true
             },
             products: [
                 {
                     id: 'prod-1',
                     name: 'Fujifilm DI-HL Medical Dry Film',
-                    size: '8×10 Inch (150 Sheets / Box)',
-                    price: 5400,
+                    size: '10×12 Inch (150 Sheets / Box)',
+                    price: 6850,
                     status: 'In Stock',
                     image: ''
                 },
                 {
                     id: 'prod-2',
-                    name: 'Fujifilm DI-HL Medical Dry Film',
-                    size: '10×12 Inch (150 Sheets / Box)',
-                    price: 6850,
-                    status: 'Limited',
-                    image: ''
-                },
-                {
-                    id: 'prod-3',
-                    name: 'Fujifilm DI-HL Medical Dry Film',
-                    size: '11×14 Inch (150 Sheets / Box)',
-                    price: 8200,
+                    name: 'Diagnostic Laboratory Reagent Kit',
+                    size: 'Full Complete Kit (Analyzer Support)',
+                    price: 12500,
                     status: 'In Stock',
                     image: ''
                 },
                 {
-                    id: 'prod-4',
-                    name: 'Fujifilm DI-HL Medical Dry Film',
-                    size: '14×17 Inch (100 Sheets / Box)',
-                    price: 7900,
+                    id: 'prod-3',
+                    name: 'Hospital Surgical Instrument Set',
+                    size: 'Stainless Steel Complete OT Set',
+                    price: 28000,
                     status: 'Limited',
+                    image: ''
+                },
+                {
+                    id: 'prod-4',
+                    name: 'Clinic Setup Diagnostic Device',
+                    size: 'Digital Patient Monitor & ECG',
+                    price: 45000,
+                    status: 'In Stock',
                     image: ''
                 }
             ],
@@ -1123,7 +1119,7 @@ function googleTranslateElementInit() {
             document.getElementById('displayCardAddress').textContent = s.address;
 
             const cleanWa = s.whatsapp.replace(/[^0-9]/g, '');
-            const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent('আসসালামু আলাইকুম MediFilm BD, আমি মেডিকেল ড্রাই ফিল্ম অর্ডার সম্পর্কে জানতে চাই।')}`;
+            const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent('আসসালামু আলাইকুম MediFilm BD, আমি মেডিকেল ফ্লিম, রিয়েজেন্ট ও সার্জিক্যাল প্রোডাক্ট সম্পর্কে জানতে চাই।')}`;
             document.getElementById('heroWhatsappBtn').href = waUrl;
             document.getElementById('cardWhatsappLink').href = waUrl;
             document.getElementById('floatingWhatsappBtn').href = waUrl;
@@ -1182,9 +1178,9 @@ function googleTranslateElementInit() {
                        </div>`
                     : `<div class="relative w-full h-48 rounded-2xl bg-gradient-to-br from-slate-100 to-teal-50 mb-4 border border-slate-200 flex flex-col items-center justify-center text-teal-700">
                            <div class="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center text-3xl text-teal-600 mb-2 group-hover:scale-110 transition">
-                               <i class="fa-solid fa-x-ray"></i>
+                               <i class="fa-solid fa-hospital"></i>
                            </div>
-                           <span class="text-xs font-bold text-slate-500">Medical Imaging Film</span>
+                           <span class="text-xs font-bold text-slate-500">Medical Equipment & Supply</span>
                            <span class="absolute top-3 left-3 px-3 py-1 rounded-xl text-xs font-extrabold border ${badgeClass}">${badgeText}</span>
                        </div>`;
 
@@ -1194,13 +1190,13 @@ function googleTranslateElementInit() {
                             ${imgHtml}
                             <h3 class="font-extrabold text-slate-900 text-lg leading-snug font-inter">${prod.name}</h3>
                             <p class="text-sm text-teal-700 font-bold mt-1.5 flex items-center gap-2">
-                                <i class="fa-solid fa-ruler-combined text-xs"></i>
+                                <i class="fa-solid fa-circle-check text-xs"></i>
                                 <span>${prod.size}</span>
                             </p>
                         </div>
                         <div class="mt-6 pt-4 border-t border-slate-100">
                             <div class="flex items-baseline justify-between mb-4">
-                                <span class="text-xs text-slate-500 font-semibold">বক্স মূল্য</span>
+                                <span class="text-xs text-slate-500 font-semibold">মূল্য</span>
                                 <span class="text-2xl font-extrabold text-slate-900 font-inter">৳${Number(prod.price).toLocaleString()}</span>
                             </div>
                             <button onclick="selectProductForOrder('${prod.id}')" class="w-full py-3.5 px-4 rounded-2xl text-sm font-extrabold transition flex items-center justify-center gap-2 shadow-md ${prod.status === 'Stock Out' ? 'bg-slate-200 text-slate-600 hover:bg-slate-300' : 'bg-slate-900 hover:bg-teal-600 text-white'}">
@@ -1283,7 +1279,7 @@ function googleTranslateElementInit() {
                 institution: document.getElementById('ordInstitution').value.trim(),
                 contactPerson: document.getElementById('ordContactPerson').value.trim(),
                 phone: document.getElementById('ordPhone').value.trim(),
-                productName: prod ? `${prod.name} (${prod.size})` : 'Medical Dry Film',
+                productName: prod ? `${prod.name} (${prod.size})` : 'Medical Product',
                 quantity: qty,
                 totalAmount: total,
                 paymentMethod: document.getElementById('ordPaymentMethod').value,
@@ -1318,7 +1314,7 @@ function googleTranslateElementInit() {
 
             document.getElementById('confirmedOrderId').textContent = orderId;
             const cleanWa = appState.settings.whatsapp.replace(/[^0-9]/g, '');
-            const waMsg = `*নতুন অর্ডার - ${appState.settings.brandName}*\nঅর্ডার আইডি: ${orderId}\nপ্রতিষ্ঠান: ${newOrd.institution}\nপণ্য: ${newOrd.productName}\nপরিমাণ: ${newOrd.quantity} বক্স\nমোট বিল: ৳${newOrd.totalAmount}\nপেমেন্ট: ${newOrd.paymentMethod} (TrxID: ${newOrd.trxId})`;
+            const waMsg = `*নতুন অর্ডার - ${appState.settings.brandName}*\nঅর্ডার আইডি: ${orderId}\nপ্রতিষ্ঠান: ${newOrd.institution}\nপণ্য: ${newOrd.productName}\nপরিমাণ: ${newOrd.quantity} পিস\nমোট বিল: ৳${newOrd.totalAmount}\nপেমেন্ট: ${newOrd.paymentMethod} (TrxID: ${newOrd.trxId})`;
             document.getElementById('sendOrderWhatsappBtn').href = `https://wa.me/${cleanWa}?text=${encodeURIComponent(waMsg)}`;
             document.getElementById('orderConfirmationBox').classList.remove('hidden');
 
@@ -1452,7 +1448,7 @@ function googleTranslateElementInit() {
                 <tr class="hover:bg-slate-50 transition">
                     <td class="py-4 px-5">
                         <div class="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center text-teal-600">
-                            ${p.image ? `<img src="${p.image}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-x-ray"></i>`}
+                            ${p.image ? `<img src="${p.image}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-hospital"></i>`}
                         </div>
                     </td>
                     <td class="py-4 px-5 font-extrabold text-slate-900 font-inter">${p.name}</td>
@@ -1497,7 +1493,7 @@ function googleTranslateElementInit() {
                                 <span class="px-3 py-1 rounded-xl text-xs font-extrabold ${ord.status === 'Payment Verified' ? 'bg-emerald-100 text-emerald-800' : ord.status === 'Delivered' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'}">${ord.status}</span>
                             </div>
                             <h4 class="font-extrabold text-slate-900 text-base">${ord.institution} <span class="text-sm font-semibold text-slate-600">(${ord.contactPerson} - ${ord.phone})</span></h4>
-                            <p class="text-sm text-teal-900 font-bold">${ord.productName} × ${ord.quantity} বক্স = <span class="font-inter font-extrabold text-teal-700">৳${Number(ord.totalAmount).toLocaleString()}</span></p>
+                            <p class="text-sm text-teal-900 font-bold">${ord.productName} × ${ord.quantity} পিস = <span class="font-inter font-extrabold text-teal-700">৳${Number(ord.totalAmount).toLocaleString()}</span></p>
                             <p class="text-xs text-slate-600 font-semibold">পেমেন্ট: <strong>${ord.paymentMethod}</strong> | TrxID: <strong class="font-inter text-slate-900">${ord.trxId}</strong> | ঠিকানা: ${ord.address}</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-3 shrink-0">
@@ -1664,7 +1660,7 @@ function googleTranslateElementInit() {
             document.getElementById('invTrxId').textContent = ord.trxId;
             document.getElementById('invStatus').textContent = ord.status;
             document.getElementById('invProduct').textContent = ord.productName;
-            document.getElementById('invQty').textContent = ord.quantity + ' Box';
+            document.getElementById('invQty').textContent = ord.quantity + ' পিস';
             document.getElementById('invTotal').textContent = '৳ ' + Number(ord.totalAmount).toLocaleString();
             document.getElementById('invoiceModal').classList.remove('hidden');
         }
